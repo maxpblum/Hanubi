@@ -6,3 +6,4 @@ function Card (suit, number) {
 // Card.prototype.copy = function() {
 //   return { suit:this.suit, number:this.number }
 // }
+module.exports = Card

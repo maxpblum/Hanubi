@@ -1,15 +1,17 @@
-function teamPiles(suits) {
+function TeamPiles(suits) {
   this.piles = {}
   this.suits = suits
 }
 
-teamPiles.prototype.addCard = function(card) {
+TeamPiles.prototype.addCard = function(card) {
   if (!this.piles[card.suit])
     this.piles[card.suit] = card
   else
     return false
 }
 
-teamPiles.prototype.getCards = function() {
+TeamPiles.prototype.getCards = function() {
   return this.piles
 }
+
+module.exports = TeamPiles

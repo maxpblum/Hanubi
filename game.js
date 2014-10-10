@@ -20,14 +20,15 @@ Game.prototype.dealCards = function() {
   var handSize = this.players.length < 4 ? 5 : 4
   for (var c = 0; c < handSize; c++)
     for (var p = 0; p < this.players.length; p++)
-      players.addCard(this.deck.takeCard())
+      this.players[p].addCard(this.deck.takeCard())
 }
 
 Game.prototype.initState = function() {
   this.discardPile  = []
+  this.teamPiles    = new TeamPiles(this.deck.suits)
   this.clues        = this.MAX_CLUES
   this.lives        = this.MAX_LIVES
-  this.endCountdown = this.player.length
+  this.endCountdown = this.players.length
   this.turn         = Math.floor(Math.random() * this.players.length)
   this.isOver       = false
 }
@@ -73,6 +74,8 @@ Game.prototype.discardCard = function(playerIndex, cardIndex) {
   
   this.players[playerIndex].addCard(this.deck.takeCard())
 
+  this.clues++
+
   this.afterMove()
 }
 
@@ -90,6 +93,9 @@ Game.prototype.playCard = function(playerIndex, cardIndex) {
       this.isOver = true
   }
 
+  if (playedCard.value === 5 && this.clues < this.MAX_CLUES)
+    this.clues++
+
   this.afterMove() 
   return moveWasValid
 }
@@ -97,10 +103,21 @@ Game.prototype.playCard = function(playerIndex, cardIndex) {
 Game.prototype.giveClue = function(playerIndex, clueRecipientIndex, suitOrValue) {
   this.beforeMove(playerIndex)
 
-  var hand = this.players.clueRecipientIndex.getCards()
+  if (this.clues <= 0)
+    throw new Error('No clues available! Play or discard a card.')
+
+  var hand = this.players[clueRecipientIndex].getCards()
 
   var matching = []
-  var parameter = parseInt(suitOrValue) ? 'value' : 'suit'
+  var parameter
+  var asAnInt = parseInt(suitOrValue)
+
+  if (asAnInt) {
+    suitOrValue = asAnInt
+    parameter = 'value'
+  }
+  else
+    parameter = 'suit'
 
   for (var c = 0; c < hand.length; c++)
     if (hand[c][parameter] === suitOrValue)
@@ -109,6 +126,10 @@ Game.prototype.giveClue = function(playerIndex, clueRecipientIndex, suitOrValue)
   if (matching.length === 0)
     throw new Error('Clue must refer to at least one card in receipient\'s hand!')
 
+  this.clues--
+
   this.afterMove()
   return matching
 }
+
+module.exports = Game

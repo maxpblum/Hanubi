@@ -17,3 +17,5 @@ Player.prototype.takeCard = function(index) {
   }
   return this.cards.splice(index, 1)[0]
 }
+
+module.exports = Player

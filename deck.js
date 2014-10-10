@@ -8,8 +8,8 @@ function Deck (withRainbow) {
 
   this.cards = []
   for (var i = 0; i < this.suits.length; i++)
-    for (var j = 0; j < this.values.length; j++)
-      this.cards.push(new Card(this.suits[i], this.values[j]))
+    for (var j = 0; j < values.length; j++)
+      this.cards.push(new Card(this.suits[i], values[j]))
 
   this.shuffle()
 }
@@ -17,7 +17,7 @@ function Deck (withRainbow) {
 Deck.prototype.takeCard = function() {
   if (this.length === 0)
     return false
-  return this.cards.popCard()
+  return this.cards.pop()
 }
 
 Deck.prototype.shuffle = function () {
@@ -36,3 +36,5 @@ Deck.prototype.shuffle = function () {
 Deck.prototype.isEmpty = function() {
   return this.cards.length === 0
 }
+
+module.exports = Deck
