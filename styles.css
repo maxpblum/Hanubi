@@ -1,0 +1,60 @@
+.visCard, .invisCard {
+  border: 1px solid;
+  border-color: black;
+  margin: 3px;
+  padding: 3px;
+}
+
+.myHand, .otherHand {
+  display: block;
+  margin: 3px;
+  padding: 3px;
+}
+
+.blueCard, .greenCard, .yellowCard, .redCard, .whiteCard, .rainbowCard, .invisCard {
+  display: inline;
+  border: 3px solid;
+  font-size: 40px;
+  margin: 3px;
+  padding: 3px;
+  background-color: white;
+}
+
+.blueCard:hover, .greenCard:hover, .yellowCard:hover, .redCard:hover, 
+.whiteCard:hover, .rainbowCard:hover, .invisCard:hover {
+  background-color: black;
+}
+
+.invisCard:hover {
+  color: white;
+}
+
+.blueCard:active, .greenCard:active, .yellowCard:active, .redCard:active, 
+.whiteCard:active, .rainbowCard:active, .invisCard:active {
+  background-color: white;
+}
+
+.blueCard {
+  border-color: blue;
+  color: blue;
+}
+
+.greenCard {
+  border-color: green;
+  color: green;
+}
+
+.redCard {
+  border-color: red;
+  color: red;
+}
+
+.whiteCard {
+  border-color: gray;
+  color: gray;
+}
+
+.yellowCard {
+  border-color: yellow;
+  color: yellow;
+}

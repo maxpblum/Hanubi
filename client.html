@@ -1,0 +1,165 @@
+<!-- template.html -->
+<html>
+  <head>
+    <title>JSHanabi</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <script src="build/react.js"></script>
+    <script src="build/JSXTransformer.js"></script>
+    <script src="build/jquery-1.11.1.js"></script>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <div id="content"></div>
+    <script type="text/jsx">
+      /** @jsx React.DOM */
+      // The above declaration must remain intact at the top of the script.
+
+      var VisCard = React.createClass({
+        render: function() {
+          return (
+            <button className={suitToCardClass(this.props.suit)}>{this.props.value}</button>
+          )
+        }
+      })
+
+      var InvisCard = React.createClass({
+        render: function() {
+          return (
+            <button className="invisCard">?</button>
+          )
+        }
+      })
+      
+      var MyHand = React.createClass({
+        render: function() {
+          return(
+            <div className="myHand">
+              My Hand:
+              <InvisCard />
+              <InvisCard />
+            </div>
+          )
+        }
+      })
+
+      var OtherHand = React.createClass({
+        render: function() {
+          var renderCard = function(card) {
+            return <VisCard suit={card.suit} value={card.number}/>
+          }
+
+          return(
+            <div className="otherHand">
+              Someone else's hand:
+              {this.props.cards.map(renderCard)}
+            </div>
+          )
+        }
+      })
+
+      // <VisCard suit={card.suit} value={card.value} key={cardKey}/>
+
+      function suitToCardClass(suitName) {
+        return suitName + 'card'
+      }
+
+      var handData = [
+        {suit: 'blue', value: 1},
+        {suit: 'green', value: 2},
+        {suit: 'white', value: 5}
+      ]
+
+      var OtherPlayers = React.createClass({
+        render: function() {
+
+          var renderHand = function(hand) {
+            return <OtherHand cards={hand}/>
+          }
+          
+          return(
+            <div className="otherPlayers">
+              {this.props.hands.map(renderHand)}
+            </div>
+          )
+        }
+      })
+
+      var AllPlayers = React.createClass({
+        render: function() {
+          return(
+            <div className="allPlayers">
+              <OtherPlayers hands={this.props.hands}/>
+              <MyHand />
+            </div>
+          )
+        }
+      })
+
+      var CluesLivesDeck = React.createClass({
+        getInitialState: function() {
+          return {clues: 8, lives: 3, cards: 34}
+        },
+        render: function() {
+          return(
+            <div className="cluesLivesDeck">
+              <div>Deck: {this.state.deck} cards left</div>
+              <div>Clues: {this.state.clues}</div>
+              <div>Lives: {this.state.lives}</div>
+            </div>
+          )
+        }
+      })
+
+      var GameText = React.createClass({
+        render: function() {
+          return(
+            <div className="gameText">
+              {this.props.text}
+            </div>
+          )
+        }
+      })
+
+      var WholeGame = React.createClass({
+        getInitialState: function() {
+
+          var socket = io('http://localhost:3000')
+
+          socket.on('connect', function() {
+            this.setState({text: "HELLO WORLD"});
+          }.bind(this))
+
+          socket.on('init', this.init)
+
+          return {text: "No connection yet?",
+                  hands: [[0]]}
+        },
+
+        init: function(game) { 
+          var parsed = JSON.parse(game)
+          console.log(parsed)
+          this.setState({
+            playerCount: parsed.playerCount,
+            hands: parsed.hands
+          }) },
+
+        render: function() {
+          return(
+            <div className="wholegame">
+              <AllPlayers count={this.state.playerCount} hands={this.state.hands}/>
+              <CluesLivesDeck />
+              <GameText text={this.state.text}/>
+            </div>
+          )
+        }
+      })
+
+      React.renderComponent(
+        <WholeGame />,
+        document.getElementById('content')
+      )
+
+
+    </script>
+  </body>
+</html>

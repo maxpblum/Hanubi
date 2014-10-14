@@ -1,3 +1,5 @@
+var Card = require("./card")
+
 function Deck (withRainbow) {
   const stdSuits = ['blue', 'red', 'green', 'white', 'yellow']
   const values   = [1, 1, 1, 2, 2, 3, 3, 4, 4, 5]

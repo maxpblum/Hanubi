@@ -1,3 +1,9 @@
+var Player = require('./player')
+var Deck   = require('./deck')
+var Card   = require('./card')
+var TeamPiles = require('./teamPiles')
+
+
 function Game(playerCount, withRainbow) {
   this.players = this.createPlayers(playerCount)
   this.deck    = new Deck(withRainbow)
@@ -14,6 +20,10 @@ Game.prototype.createPlayers = function(playerCount) {
     players.push(new Player())
 
   return players
+}
+
+Game.prototype.getPlayers = function() {
+  return this.players;
 }
 
 Game.prototype.dealCards = function() {
