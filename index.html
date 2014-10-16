@@ -1,0 +1,96 @@
+<!-- template.html -->
+<html>
+  <head>
+    <title>JSHanabi</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <script src="react"></script>
+    <script src="JSXTransformer"></script>
+    <script src="jquery"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+      button {
+        margin-left: 10px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="header"><h1>Welcome to HaNaNabi!</h1></div>
+    <div id="content"></div>
+    <script type="text/jsx">
+      /** @jsx React.DOM */
+      // The above declaration must remain intact at the top of the script.
+
+      var socket;
+
+      var Status = React.createClass({
+        render: function() {
+          if(this.props.connected) {
+            return <div>There are currently {this.props.players} players connected</div>
+          } else {
+            return <div>Server is down. I repeat: The server is down! Panic is advisable!</div>
+          }
+        }
+      });
+
+      var PlayerList = React.createClass({
+        render: function() {
+          var createPlayer = function(player) {
+            return <li key={player.id}>{player.name}</li>
+          };
+          return <ul>{this.props.players.map(createPlayer)}</ul>
+        }
+      });
+
+      var HaNaNabi = React.createClass({
+        getInitialState: function() {
+          socket = io("http://10.0.6.159:3000");
+          socket.on('disconnect', function () {
+            this.setState({players: [], connected: false});
+          }.bind(this));
+          socket.on('connect', function () {
+            this.setState({connected: true});
+          }.bind(this));
+          socket.on("allPlayers", function(data) {
+            this.setState({
+              players: data, 
+              disabled: {start: (data.length < 2 && data.length > 5), join: this.state.disabled.join}
+            });
+          }.bind(this));
+          return {players: [], disabled: {join: true, start: true}};
+        },
+
+        onChange: function(e) {
+          var name = e.target.value;
+          this.setState({name: name, disabled: {start: this.state.disabled.start, join: (name === "") }});
+        },
+
+        handleSubmit: function(e) {
+          e.preventDefault();
+          socket.emit("join", this.state.name);
+        },
+
+        startGame: function() {
+          console.log("TODO: Start the game");
+        },
+
+        render: function() {
+          return (
+            <div>
+              <Status connected={this.state.connected} players={this.state.players.length} />
+              <PlayerList players={this.state.players} />
+              <form onSubmit={this.handleSubmit}>
+                <input onChange={this.onChange} value={this.state.name} />
+                <button disabled={this.state.disabled.join}>Join game</button>
+              </form>
+              <button disabled={this.state.disabled.start} onClick={this.startGame}>Start game</button>
+            </div>
+          );
+        }
+      
+      });
+
+      React.renderComponent(<HaNaNabi />, document.getElementById('content'));
+    </script>
+  </body>
+</html>

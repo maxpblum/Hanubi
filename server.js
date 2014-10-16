@@ -5,7 +5,10 @@ var io = require('socket.io')(http);
 var Game = require('./game')
 
 app.get('/', function(req, res){
-  res.sendFile(path.join(__dirname, 'client.html'))
+  res.sendFile(path.join(__dirname, 'index.html'))
+});
+app.get('/game', function(req, res){
+  res.sendFile(path.join(__dirname, 'game.html'))
 });
 app.get('/styles.css', function(req, res){
   res.sendFile(path.resolve('./styles.css'))
