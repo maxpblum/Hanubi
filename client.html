@@ -3,10 +3,10 @@
   <head>
     <title>JSHanabi</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
-    <script src="build/react.js"></script>
-    <script src="build/JSXTransformer.js"></script>
-    <script src="build/jquery-1.11.1.js"></script>
-    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script src="react"></script>
+    <script src="JSXTransformer"></script>
+    <script src="jquery"></script>
+    <script src="/socket.io/socket.io.js"></script>
   </head>
   <body>
     <div id="content"></div>
@@ -14,71 +14,182 @@
       /** @jsx React.DOM */
       // The above declaration must remain intact at the top of the script.
 
+      var socket
+      var state
+      var yourPlayerNum = 0
+
       var VisCard = React.createClass({
+        showDialog: function(recipient, suit, number) {
+          if (state.whoseTurn != yourPlayerNum)
+            return
+
+          if (document.getElementById('playOrDiscardWindow').open)
+            document.getElementById('playOrDiscardWindow').close()
+
+          var dialog = document.getElementById('clueWindow')
+          dialog.show();
+
+          document.getElementById('giveClueAboutSuit').onclick = function() {
+            socket.emit('clue', JSON.stringify({
+              giver: yourPlayerNum,
+              recipient: recipient,
+              suitOrNumber: suit
+            }))
+            dialog.close()
+          }
+
+          document.getElementById('giveClueAboutNumber').onclick = function() {
+            socket.emit('clue', JSON.stringify({
+              giver: yourPlayerNum,
+              recipient: recipient,
+              suitOrNumber: number
+            }))
+            dialog.close()
+          }
+
+          document.getElementById('cancelClueWindow').onclick = function() { dialog.close() }
+        },
+
         render: function() {
           return (
-            <button className={suitToCardClass(this.props.suit)}>{this.props.value}</button>
+            <div className="cardContainer">
+              <button className={suitToCardClass(this.props.suit)} 
+                      onClick={function() {
+                        this.showDialog(this.props.playerNum, this.props.suit, this.props.number)
+                      }.bind(this)}>
+                {this.props.number}
+              </button>
+            </div>
           )
         }
       })
 
       var InvisCard = React.createClass({
+        showDialog: function(cardIndex) {
+          if (state.whoseTurn != yourPlayerNum)
+            return
+
+          if (document.getElementById('clueWindow').open)
+            document.getElementById('clueWindow').close()
+
+          var dialog = document.getElementById('playOrDiscardWindow')
+          dialog.show();
+
+          document.getElementById('playCard').onclick = function() {
+            socket.emit('playCard', JSON.stringify({
+              player: yourPlayerNum,
+              cardIndex: cardIndex
+            }))
+            dialog.close()
+          }
+
+          document.getElementById('discard').onclick = function() {
+            socket.emit('discard', JSON.stringify({
+              player: yourPlayerNum,
+              cardIndex: cardIndex
+            }))
+            dialog.close()
+          }
+
+          document.getElementById('cancelPDWindow').onclick = function() { dialog.close() }
+        },
+
+        renderCard: function(card) {
+          return <invisCard suit={card.suit} number={card.number}/>
+        },
+
         render: function() {
           return (
-            <button className="invisCard">?</button>
+            <button className="invisCard" onClick={function(){ this.showDialog(3) }.bind(this)}>?</button>
           )
         }
+      })
+
+      var TeamPiles = React.createClass({
+        renderCard: function(card) {
+          return <VisCard suit={card.suit} number={card.number}/>
+        },
+        render: function() {
+          return(
+            <div className="teamPiles">
+              Team Piles:
+              {this.props.cards.map(this.renderCard)}
+            </div>
+          )
+        }
+      })
+
+      var Discards = React.createClass({
+        renderCard: function(card) {
+          return <VisCard suit={card.suit} number={card.number}/>
+        },
+        render: function() {
+          return(
+            <div className="discards">
+              Discards:
+              {this.props.cards.map(this.renderCard)}
+            </div>
+          )
+        }       
       })
       
       var MyHand = React.createClass({
         render: function() {
+          var cards = []
+          for (var c = 0; c < this.props.yourCards; c++)
+            cards.push(<InvisCard />)
+
           return(
             <div className="myHand">
               My Hand:
-              <InvisCard />
-              <InvisCard />
+              {cards}
             </div>
           )
         }
       })
 
       var OtherHand = React.createClass({
-        render: function() {
-          var renderCard = function(card) {
-            return <VisCard suit={card.suit} value={card.number}/>
+        renderCards: function() {
+          var cards = []
+          for (var c = 0; c < this.props.cards.length; c++) {
+            var card = this.props.cards[c]
+            cards.push(<VisCard suit={card.suit} number={card.number} playerNum={this.props.playerNum}/>)
           }
+          return cards
+        },
 
+        render: function() {
           return(
             <div className="otherHand">
               Someone else's hand:
-              {this.props.cards.map(renderCard)}
+              {this.renderCards()}
             </div>
           )
         }
       })
 
-      // <VisCard suit={card.suit} value={card.value} key={cardKey}/>
+      // <VisCard suit={card.suit} Number={card.Number} key={cardKey}/>
 
       function suitToCardClass(suitName) {
         return suitName + 'card'
       }
 
-      var handData = [
-        {suit: 'blue', value: 1},
-        {suit: 'green', value: 2},
-        {suit: 'white', value: 5}
-      ]
-
       var OtherPlayers = React.createClass({
-        render: function() {
-
-          var renderHand = function(hand) {
-            return <OtherHand cards={hand}/>
+        makeHands: function(listOfHands) {
+          var hands = []
+          for (var h = 0; h < listOfHands.length; h++) {
+            var playerNum = h
+            if (playerNum >= yourPlayerNum)
+              playerNum++
+            hands.push(<OtherHand cards={listOfHands[h]} playerNum={playerNum}/>)
           }
-          
+          return hands
+        },
+
+        render: function() {
           return(
             <div className="otherPlayers">
-              {this.props.hands.map(renderHand)}
+              {this.makeHands(this.props.hands)}
             </div>
           )
         }
@@ -89,22 +200,19 @@
           return(
             <div className="allPlayers">
               <OtherPlayers hands={this.props.hands}/>
-              <MyHand />
+              <MyHand yourCards={this.props.yourCards}/>
             </div>
           )
         }
       })
 
       var CluesLivesDeck = React.createClass({
-        getInitialState: function() {
-          return {clues: 8, lives: 3, cards: 34}
-        },
         render: function() {
           return(
             <div className="cluesLivesDeck">
-              <div>Deck: {this.state.deck} cards left</div>
-              <div>Clues: {this.state.clues}</div>
-              <div>Lives: {this.state.lives}</div>
+              <div>Deck: {this.props.deckLength} cards left</div>
+              <div>Clues: {this.props.clues}</div>
+              <div>Lives: {this.props.lives}</div>
             </div>
           )
         }
@@ -123,32 +231,47 @@
       var WholeGame = React.createClass({
         getInitialState: function() {
 
-          var socket = io('http://localhost:3000')
+          socket = io()
 
           socket.on('connect', function() {
-            this.setState({text: "HELLO WORLD"});
+            this.setState({text: "Connect"});
           }.bind(this))
 
-          socket.on('init', this.init)
+          socket.on('youAre', function(numString) {
+            yourPlayerNum = parseInt(numString)
+          })
 
-          return {text: "No connection yet?",
-                  hands: [[0]]}
+          socket.on('gameInit', this.gameInit)
+
+          socket.on('erra', this.showError)
+
+          state = {gameText: "No connection yet?",
+                  hands: [[0]],
+                  teamPiles: [],
+                  discards: [],
+                  yourPlayerNum: 0}
+
+          return state
         },
 
-        init: function(game) { 
-          var parsed = JSON.parse(game)
-          console.log(parsed)
-          this.setState({
-            playerCount: parsed.playerCount,
-            hands: parsed.hands
-          }) },
+        showError: function(message) {
+          this.setState({gameText: message})
+        },
+
+        gameInit: function(game) { 
+          var state = JSON.parse(game)
+          state.gameText = (state.whoseTurn === yourPlayerNum) ? "Your turn" : "Player " + state.whoseTurn + "'s turn"
+          this.setState(state) 
+        },
 
         render: function() {
           return(
             <div className="wholegame">
-              <AllPlayers count={this.state.playerCount} hands={this.state.hands}/>
-              <CluesLivesDeck />
-              <GameText text={this.state.text}/>
+              <TeamPiles cards={this.state.teamPiles}/>
+              <Discards cards={this.state.discards}/>
+              <AllPlayers count={this.state.playerCount} hands={this.state.hands} yourCards={this.state.hands[yourPlayerNum].length}/>
+              <CluesLivesDeck deckLength={this.state.deckLength} clues={this.state.clues} lives={this.state.lives}/>
+              <GameText text={this.state.gameText}/>
             </div>
           )
         }
@@ -161,5 +284,15 @@
 
 
     </script>
+    <dialog id="clueWindow">
+      <button id="giveClueAboutSuit">Suit Clue</button>
+      <button id="giveClueAboutNumber">Number Clue</button>
+      <button id="cancelClueWindow">x</button>
+    </dialog>
+    <dialog id="playOrDiscardWindow">
+      <button id="playCard">Play Card</button>
+      <button id="discard">Discard</button>
+      <button id="cancelPDWindow">x</button>
+    </dialog>
   </body>
 </html>

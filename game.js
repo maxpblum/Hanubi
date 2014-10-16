@@ -23,7 +23,15 @@ Game.prototype.createPlayers = function(playerCount) {
 }
 
 Game.prototype.getPlayers = function() {
-  return this.players;
+  return this.players
+}
+
+Game.prototype.getDeckLength = function() {
+  return this.deck.getLength()
+}
+
+Game.prototype.getTeamPiles = function() {
+  return this.teamPiles.getCards()
 }
 
 Game.prototype.dealCards = function() {
@@ -74,7 +82,7 @@ Game.prototype.afterMove = function() {
   this.setNextTurn()
 }
 
-Game.prototype.discardCard = function(playerIndex, cardIndex) {
+Game.prototype.discard = function(playerIndex, cardIndex) {
   this.beforeMove(playerIndex)
 
   if (this.clues === this.MAX_CLUES)
@@ -103,6 +111,9 @@ Game.prototype.playCard = function(playerIndex, cardIndex) {
       this.isOver = true
   }
 
+  this.players[playerIndex].addCard(this.deck.takeCard())
+
+
   if (playedCard.value === 5 && this.clues < this.MAX_CLUES)
     this.clues++
 
@@ -111,6 +122,7 @@ Game.prototype.playCard = function(playerIndex, cardIndex) {
 }
 
 Game.prototype.giveClue = function(playerIndex, clueRecipientIndex, suitOrValue) {
+
   this.beforeMove(playerIndex)
 
   if (this.clues <= 0)
@@ -124,7 +136,7 @@ Game.prototype.giveClue = function(playerIndex, clueRecipientIndex, suitOrValue)
 
   if (asAnInt) {
     suitOrValue = asAnInt
-    parameter = 'value'
+    parameter = 'number'
   }
   else
     parameter = 'suit'

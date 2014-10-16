@@ -4,7 +4,9 @@ function TeamPiles(suits) {
 }
 
 TeamPiles.prototype.addCard = function(card) {
-  if (!this.piles[card.suit])
+  console.log(card)
+  if (!this.piles[card.suit] && card.number === 1 ||
+    (this.piles[card.suit] && (card.number === this.piles[card.suit].number + 1)))
     this.piles[card.suit] = card
   else
     return false

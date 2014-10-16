@@ -39,4 +39,8 @@ Deck.prototype.isEmpty = function() {
   return this.cards.length === 0
 }
 
+Deck.prototype.getLength = function() {
+  return this.cards.length
+}
+
 module.exports = Deck

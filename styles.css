@@ -5,6 +5,13 @@
   padding: 3px;
 }
 
+.cardContainer {
+  border: 0px;
+  margin: 0px;
+  padding: 0px;
+  display: inline;
+}
+
 .myHand, .otherHand {
   display: block;
   margin: 3px;
