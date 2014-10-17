@@ -64,8 +64,13 @@ function Player(name, socket) {
 }
 
 function removePlayer(player) {
+  if (parseInt(player)) {
+    players.splice(player, 1)
+    return
+  }
   if (game === false && gameBackup === false) {
     // Someone left, but there's no game yet so we can just shift everyone down
+    console.log('splicing!')
     players.splice(player.num, 1)
     assignPlayerNums()
   }
@@ -151,6 +156,15 @@ io.on('connection', function(socket) {
       socket.emit('erra', 'There is already a player with that socket')
   })
 
+  socket.on('chat', function(text) {
+    console.log(text)
+    var player = getPlayerBySocket(socket)
+    if (player)
+      io.sockets.emit('chat', { name: player.name, text: text })
+    else
+      socket.emit('erra', 'ENTER A FREAKIN NAME')
+  })
+
   socket.on('startGame', function(_) {
     if (players.length < 2) {
       // stuff
@@ -167,7 +181,8 @@ io.on('connection', function(socket) {
     console.log('disconnected')
     for (var p = 0; p < players.length; p++) {
       if (players[p].socket === socket) {
-        removePlayer(socket)
+        console.log(players)
+        removePlayer(p)
         return 
       }
     }
