@@ -1,3 +1,5 @@
+@import url(http://fonts.googleapis.com/css?family=Indie+Flower);
+
 .visCard, .invisCard {
   border: 1px solid;
   border-color: black;
@@ -64,4 +66,51 @@
 .yellowCard {
   border-color: yellow;
   color: yellow;
+}
+
+/* styling for index.html */
+body {
+  color: white;
+  font-family: 'Indie Flower', cursive;
+  background-color: #11083f;
+}
+div#main {
+  width: 900px;
+  height: 700px;
+  margin: 10px auto;
+  background: #11083f url(/hanabi.png) no-repeat left top;
+  border: 5px solid #7853a3;
+  position: relative;
+}
+div#chat {
+  background-color: rgba(10, 10, 10, 0.8);
+  width: 400px;
+  height: 400px;
+  padding: 20px;
+  border-radius: 15px;
+
+  position: absolute;
+  right: 10px;
+  top: 250px;
+}
+div#chat dl {
+  width: 100%;
+  height: 350px;
+  padding: 0px;
+  margin: 0px;
+}
+div#chat .overflow-wrapper {
+  overflow: scroll;
+}
+div#chat form {
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+}
+div#chat form input {
+  width: 70%;
+}
+div#chat form button {
+  width: 20%;
+  margin: 0 10px;
 }

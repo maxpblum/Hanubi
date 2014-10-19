@@ -7,21 +7,17 @@
     <script src="JSXTransformer"></script>
     <script src="jquery"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <style>
-      button {
-        margin-left: 10px;
-      }
-
-    </style>
   </head>
   <body>
-    <div id="header"><h1>Welcome to HaNaNabi!</h1></div>
-    <div id="content"></div>
+    <div id="main">
+      <div id="player"></div>
+      <div id="chat"></div>
+    </div>
     <script type="text/jsx">
       /** @jsx React.DOM */
       // The above declaration must remain intact at the top of the script.
 
-      var socket;
+      var socket = io("http://localhost:3001");
 
       var Status = React.createClass({
         render: function() {
@@ -42,9 +38,49 @@
         }
       });
 
+      var Chat = React.createClass({
+        getInitialState: function() {
+          socket.on('chat', function(message) {
+            console.log(message)
+            var messages = this.state.messages;
+            messages.push(message);
+            this.setState({messages: messages});
+            // Scroll to bottom to see the new message
+            var wrapper = document.getElementsByClassName("overflow-wrapper")[0];
+            wrapper.scrollTop = wrapper.scrollHeight;
+          }.bind(this));
+          return {message: "", messages: []}
+        },
+        show: function(message) {
+          return [<dt>{message.name}</dt>,
+                  <dd>{message.text}</dd>]
+        },
+        emitMessage: function(e) {
+          e.preventDefault();
+          var message = this.state.message;
+          socket.emit('chat', message); 
+        },
+        onChange: function(e) {
+          var message = e.target.value;
+          this.setState({message: message});
+        },
+        render: function() {
+          return (
+            <div className='chat'>
+              <div className='overflow-wrapper'>
+                <dl>{this.state.messages.map(this.show)}</dl>
+              </div>
+              <form onSubmit={this.emitMessage}>
+                <input onChange={this.onChange} value={this.state.message} />
+                <button>Send</button>
+              </form>
+            </div>
+          )
+        }
+      });
+
       var HaNaNabi = React.createClass({
         getInitialState: function() {
-          socket = io("http://10.0.6.159:3000");
           socket.on('disconnect', function () {
             this.setState({players: [], connected: false});
           }.bind(this));
@@ -90,7 +126,8 @@
       
       });
 
-      React.renderComponent(<HaNaNabi />, document.getElementById('content'));
+      React.renderComponent(<HaNaNabi />, document.getElementById('player'));
+      React.renderComponent(<Chat />, document.getElementById('chat'));
     </script>
   </body>
 </html>
