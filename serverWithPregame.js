@@ -1,6 +1,7 @@
 var path = require('path')
 var express = require('express')
 var app = express()
+var cookie = require('cookie')
 var cookieParser = require('cookie-parser')
 var session = require('express-session')
 var http = require('http').Server(app);
@@ -10,6 +11,28 @@ var Game = require('./game')
 var game
 var gameUsers = {}
 var users = {}
+
+function getPlayerNum(session) {
+  if (gameUsers[session])
+    return gameUsers[session].playerNum
+  else
+    return false
+}
+
+function allUserNames(userList) {
+  nameObjs = []
+
+  Object.keys(userList).forEach(function(session, index) {
+    if (userList.hasOwnProperty(session)) {
+      nameObjs.push({
+        id: index,
+        name: userList[session].name
+      })
+    }
+  })
+
+  return nameObjs
+}
 
 function keyCount(obj) {
   Object.keys(obj).length
@@ -42,10 +65,18 @@ function makeUser(name, session, socket) {
 }
 
 function matchSocket(session, socket) {
-  if (users[session])
+  var socketExists = false
+
+  if (users[session]) {
     users[session].updateSocket(socket)
-  if (gameUsers[session])
+    socketExists = true
+  }
+  if (gameUsers[session]) {
     gameUsers[session].updateSocket(socket)
+    socketExists = true
+  }
+
+  return socketExists
 }
 
 function removeSocket(session) {
@@ -63,8 +94,54 @@ function removeSocket(session) {
 }
 
 function lockInUsers() {
-  Object.keys(users).forEach(function(session) {
+  Object.keys(users).forEach(function(session, index) {
     gameUsers[session] = users[session]
+    gameUsers[session].playerNum = index
+
+    gameUsers[session].addGameHandlers = function() {
+      this.socket.on('clue', function(clue){
+        clue = JSON.parse(clue)
+        try {
+          var matching = game.giveClue(clue.giver, 
+            clue.recipient, clue.suitOrNumber)
+          updatePlayers()
+        }
+        catch(err) {
+          this.socket.emit('erra', err.message)
+          console.log(err.message)
+        }
+      })
+      this.socket.on('playCard', function(play){
+        play = JSON.parse(play)
+        try {
+          game.playCard(play.player, play.cardIndex)
+          updatePlayers()
+        }
+        catch(err) {
+          this.socket.emit('erra', err.message)
+          console.log(err.message)
+        }
+      })
+      this.socket.on('discard' , function(discard){
+        discard = JSON.parse(discard)
+        try {
+          io.discard(discard.player, discard.cardIndex)
+          updatePlayers()
+        }
+        catch(err) {
+          this.socket.emit('erra', err.message)
+          console.log(err.message)
+        }
+      })
+    }
+
+    gameUsers[session].updateSocket = function(socket) {
+      this.socket = socket
+      this.addGameHandlers()
+      this.socket.emit('youAre', this.playerNum)
+      updateOnePlayer(gameUsers[session])
+    }
+
     users[session] = undefined
   })
 }
@@ -83,9 +160,50 @@ function startGame() {
     game = new Game(keyCount(users))
     lockInUsers()
     sayGameIsStarting()
-    updatePlayers()
     return true
   }
+}
+
+function updateSocketOnPlayer(socket) {
+  this.socket = socket
+  this.addGameHandlers()
+}
+
+function updatePlayers() {
+  Object.keys(gameUsers).forEach(function(session){
+    updateOnePlayer(gameUsers[session])
+  })
+}
+
+function updateOnePlayer(user) {
+  user.socket.emit('gameInit', user.playerNum)
+}
+
+function stringifyGame(game, forPlayer) {
+
+  var toSend = {
+    playerCount: game.getPlayers().length,
+    hands: game.getPlayers().map(function(player) {
+      return player.getCards()
+    }),
+    deckLength: game.getDeckLength(),
+    clues: game.clues,
+    lives: game.lives,
+    yourCards: game.getPlayers()[forPlayer].getCards().length,
+    teamPiles: function(){
+      var cards = []
+      for (var suit in game.getTeamPiles())
+        cards.push(game.getTeamPiles()[suit])
+      return cards
+    }(),
+    discards: game.discardPile,
+    gameIsOver: game.isOver,
+    whoseTurn: game.turn
+  }
+
+  toSend.hands.splice(forPlayer, 1)
+
+  return JSON.stringify(toSend)
 }
 
 app.use(cookieParser())
@@ -118,14 +236,29 @@ app.get('/JSXTransformer', function(req, res){
 app.get('/jquery', function(req, res){
   res.sendFile(path.resolve('./build/jquery-1.11.1.js'))
 })
+app.get('/hanabi.png', function(req, res){
+  res.sendFile(path.resolve('./hanabi.png'))
+})
 
 io.sockets.on('connection', function(socket){
   var session = cookie.parse(socket.handshake.headers.cookie)['connect.sid']
 
-  matchSocket(session, socket)
+  if (matchSocket(session, socket))
+    socket.emit('joined')
+
+  socket.emit('allPlayers', allUserNames(users))
 
   socket.on('join', function (name) {
     makeUser(name, session, socket)
+    socket.emit('joined')
+    io.sockets.emit('allPlayers', allUserNames(users))
+  })
+
+  socket.on('chat', function(text) {
+    if (users[session])
+      io.sockets.emit('chat', { name: users[session].name, text: text })
+    else
+      socket.emit('erra', 'ENTER A FREAKIN NAME')
   })
 
   socket.on('startGame', function() {
