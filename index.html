@@ -10,21 +10,17 @@
   </head>
   <body>
     <div id="main">
-      <div id="start">
-        <button disabled="true" class="button">Start Game</button>
-      </div>
-      <div id="players"></div>
-      <div id="chat"></div>
     </div>
     <script type="text/jsx">
       /** @jsx React.DOM */
       // The above declaration must remain intact at the top of the script.
 
       var startGame = function() {
-        console.log("TODO: Start the game");
+        console.log("emitting startGame")
+        socket.emit("startGame");
       };
 
-      var socket = io("http://localhost:3001");
+      var socket = io();
 
       var Status = React.createClass({
         render: function() {
@@ -36,12 +32,41 @@
         }
       });
 
-      var PlayerList = React.createClass({
+      var Start = React.createClass({
+        render : function() {
+          return (
+            <div id="start">
+              <button disabled={!this.props.enabled} onClick={startGame} className="button">Start Game</button>
+            </div>
+          )
+        }
+      });
+
+      var PlayersList = React.createClass({
+        getInitialState: function() {
+          return {name: ""}
+        },
+        onChange: function(e) {
+          this.setState({name: e.target.value});
+        },
+        handleSubmit: function(e) {
+          e.preventDefault();
+          socket.emit("join", this.state.name);
+        },
         render: function() {
           var createPlayer = function(player) {
             return <li key={player.id}>{player.name}</li>
           };
-          return <ul>{this.props.players.map(createPlayer)}</ul>
+          return (
+            <div id="players">
+              <Status connected={this.props.connected} players={this.props.players.length} />
+              <ul>{this.props.players.map(createPlayer)}</ul>
+              <form className='name' onSubmit={this.handleSubmit}>
+                <input onChange={this.onChange} value={this.state.name} />
+                <button className='button' disabled={!this.state.name}>Join game</button>
+              </form>
+            </div>
+          )
         }
       });
 
@@ -65,6 +90,7 @@
           e.preventDefault();
           var message = this.state.message;
           socket.emit('chat', message); 
+          this.setState({message: ''});
         },
         onChange: function(e) {
           var message = e.target.value;
@@ -72,13 +98,13 @@
         },
         render: function() {
           return (
-            <div className='chat'>
+            <div id='chat'>
               <div className='overflow-wrapper'>
                 <dl>{this.state.messages.map(this.show)}</dl>
               </div>
               <form onSubmit={this.emitMessage}>
-                <input onChange={this.onChange} value={this.state.message} />
-                <button className='button send' disabled='true'>Send</button>
+                <input id='chat-message' onChange={this.onChange} value={this.state.message} />
+                <button className='button send' disabled={!this.props.joined}>Send</button>
               </form>
             </div>
           )
@@ -88,61 +114,44 @@
       var HaNaNabi = React.createClass({
         getInitialState: function() {
           socket.on('disconnect', function () {
-            this.setState({players: [], connected: false});
+            this.setState({players: [], connected: false, joined: false});
           }.bind(this));
+
           socket.on('connect', function () {
             this.setState({connected: true});
           }.bind(this));
-          socket.on("allPlayers", function(data) {
-            this.setState({
-              players: data, 
-              disabled: {join: this.state.disabled.join}
-            });
-            this.checkStart();
+
+          socket.on('joined', function() {
+            console.log("Should set state joined to true");
+            this.setState({joined: true});
           }.bind(this));
-          return {players: [], disabled: {join: true, start: true}};
-        },
 
-        checkStart: function() {
-          var players = this.state.players.length;
-          if(players < 2 || players > 5) {
-              $('#start button').attr('disabled');
-          } else {
-              $('#start button').removeAttr('disabled');
-          }
-        },
+          socket.on('gameIsStarting', function() {
+          console.log("Should redirect");
+            window.open('/game');
+          });
 
-        onChange: function(e) {
-          var name = e.target.value;
-          this.setState({name: name, disabled: {start: this.state.disabled.start, join: (name === "") }});
-        },
-
-        handleSubmit: function(e) {
-          e.preventDefault();
-          name = this.state.name;
-          socket.emit("join", this.state.name);
-          $('form.name button').attr('disabled', 'true');
-          $('button.send').removeAttr('disabled');
-          this.checkStart();
+          socket.on("allPlayers", function(data) {
+            this.setState({players: data, start: data.length > 1 && data.length < 6});
+          }.bind(this));
+          
+          // TODO change start state
+          return {players: [], start: false, joined: false};
         },
 
         render: function() {
           return (
             <div>
-              <Status connected={this.state.connected} players={this.state.players.length} />
-              <PlayerList players={this.state.players} />
-              <form className='name' onSubmit={this.handleSubmit}>
-                <input onChange={this.onChange} value={this.state.name} />
-                <button className='button' disabled={this.state.disabled.join}>Join game</button>
-              </form>
+              <Start enabled={this.state.start}/>,
+              <PlayersList players={this.state.players} connected={this.state.connected} joined={this.state.joined} />,
+              <Chat joined={this.state.joined} />
             </div>
           );
         }
       
       });
 
-      React.renderComponent(<HaNaNabi />, document.getElementById('players'));
-      React.renderComponent(<Chat />, document.getElementById('chat'));
+      React.renderComponent(<HaNaNabi />, document.getElementById('main'));
     </script>
   </body>
 </html>
