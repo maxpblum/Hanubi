@@ -23,6 +23,8 @@
           if (state.whoseTurn != yourPlayerNum)
             return
 
+          console.log('your turn')
+
           if (document.getElementById('playOrDiscardWindow').open)
             document.getElementById('playOrDiscardWindow').close()
 
@@ -237,21 +239,33 @@
             this.setState({text: "Connect"});
           }.bind(this))
 
-          socket.on('youAre', function(numString) {
-            yourPlayerNum = parseInt(numString)
-          })
+          socket.on('youAre', this.assignPlayerNum)
 
           socket.on('gameInit', this.gameInit)
 
           socket.on('erra', this.showError)
 
+          socket.on('numPlayers', this.numPlayersUpdate)
+
           state = {gameText: "No connection yet?",
+                  connected: 0,
                   hands: [[0]],
                   teamPiles: [],
                   discards: [],
+                  gameExists: false,
                   yourPlayerNum: 0}
 
           return state
+        },
+
+        assignPlayerNum: function(numStr) {
+          yourPlayerNum = parseInt(numStr)
+          this.render()
+        },
+
+        numPlayersUpdate: function(numStr) {
+          var num = parseInt(numStr)
+          this.setState({connected: numStr})
         },
 
         showError: function(message) {
@@ -259,21 +273,52 @@
         },
 
         gameInit: function(game) { 
+          console.log('gameInit')
+          if (!this.state.gameExists)
+            this.setState({gameExists: true})
           var state = JSON.parse(game)
           state.gameText = (state.whoseTurn === yourPlayerNum) ? "Your turn" : "Player " + state.whoseTurn + "'s turn"
+          window.state = state
           this.setState(state) 
         },
 
+        enoughPlayers: function() {
+          return this.state.connected >= 2
+        },
+
+        startGame: function() {
+          socket.emit('startGame', '')
+        },
+
+        stopGame: function() {
+          this.setState(this.getInitialState())
+        },
+
+        noGameYetWindow: function() {
+          var div = <div>
+            There are {this.state.connected} players connected.
+            {console.log(this.enoughPlayers())}
+            <button disabled={!this.enoughPlayers()} onClick={this.startGame}>Start Game</button>
+          </div>
+
+          return div
+        },
+
         render: function() {
-          return(
-            <div className="wholegame">
-              <TeamPiles cards={this.state.teamPiles}/>
-              <Discards cards={this.state.discards}/>
-              <AllPlayers count={this.state.playerCount} hands={this.state.hands} yourCards={this.state.hands[yourPlayerNum].length}/>
-              <CluesLivesDeck deckLength={this.state.deckLength} clues={this.state.clues} lives={this.state.lives}/>
-              <GameText text={this.state.gameText}/>
-            </div>
-          )
+          if (this.state.gameExists) {
+            return(
+              <div className="wholegame">
+                <TeamPiles cards={this.state.teamPiles}/>
+                <Discards cards={this.state.discards}/>
+                <AllPlayers count={this.state.playerCount} hands={this.state.hands} yourCards={this.state.yourCards}/>
+                <CluesLivesDeck deckLength={this.state.deckLength} clues={this.state.clues} lives={this.state.lives}/>
+                <GameText text={this.state.gameText}/>
+              </div>
+            )
+          }
+          else {
+            return this.noGameYetWindow()
+          }
         }
       })
 
@@ -283,8 +328,7 @@
       )
 
 
-    </script>
-    <dialog id="clueWindow">
+    </script><dialog id="clueWindow">
       <button id="giveClueAboutSuit">Suit Clue</button>
       <button id="giveClueAboutNumber">Number Clue</button>
       <button id="cancelClueWindow">x</button>
@@ -293,6 +337,9 @@
       <button id="playCard">Play Card</button>
       <button id="discard">Discard</button>
       <button id="cancelPDWindow">x</button>
+    </dialog>
+    <dialog id="noGameYetWindow">
+      <button id="start">Start Game</button>
     </dialog>
   </body>
 </html>

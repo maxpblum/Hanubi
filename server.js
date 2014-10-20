@@ -23,7 +23,7 @@ app.get('/jquery', function(req, res){
   res.sendFile(path.resolve('./build/jquery-1.11.1.js'))
 });
 
-var game = new Game(2)
+var game
 var socketToPlayer = {}
 var playerToSocket = []
 
@@ -61,24 +61,52 @@ function sendGameState() {
   }
 }
 
+function startGame() {
+  game = new Game(playerToSocket.length)
+  console.log('starting game')
+  sendGameState()
+}
+
+function removeSocket() {
+  num = socketToPlayer[this.id]
+  socketToPlayer[this.id] = undefined
+  playerToSocket.splice(num, 1)
+  console.log('disconnected')
+  console.log('players :' + this.playerToSocket)
+  if (game.getPlayers())
+    checkWrongNumberPlayers()
+}
+
+function checkWrongNumberPlayers() {
+  if (socketToPlayer.length != game.plyers.length) {
+    playerToSocket.forEach(function(socket) {
+      socket.emit('noGame', '')
+    })
+  }
+}
+
+function assignNums() {
+  for (var p = 0; p < playerToSocket.length; p++) {
+    playerToSocket[p].emit('youAre', p)
+  }
+}
+
 io.on('connection', function(socket){
 
   playerToSocket.push(socket)
   socketToPlayer[socket.id] = playerToSocket.length - 1
-  
+
+  io.emit('numPlayers', playerToSocket.length)
 
   console.log("socket: " + socket.id + " is player " + socketToPlayer[socket.id])
 
   console.log('user connected!')
 
-  sendGameState()
+  assignNums()
 
-  socket.emit('youAre', socketToPlayer[socket.id])
+  socket.on('startGame', startGame)
 
-
-  socket.on('disconnect', function(){
-    console.log('disconnected')
-  });
+  socket.on('disconnect', removeSocket.bind(socket))
 
   socket.on('clue', function(clue){
     clue = JSON.parse(clue)
