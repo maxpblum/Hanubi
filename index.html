@@ -128,7 +128,7 @@
 
           socket.on('gameIsStarting', function() {
           console.log("Should redirect");
-            window.open('/game');
+            window.location.href = '/game';
           });
 
           socket.on("allPlayers", function(data) {

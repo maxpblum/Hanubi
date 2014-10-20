@@ -178,10 +178,8 @@
         makeHands: function(listOfHands) {
           var hands = []
           for (var h = 0; h < listOfHands.length; h++) {
-            var playerNum = h
-            if (playerNum >= yourPlayerNum)
-              playerNum++
-            hands.push(<OtherHand cards={listOfHands[h]} playerNum={playerNum}/>)
+            if (hands[h])
+              hands.push(<OtherHand cards={listOfHands[h]} playerNum={playerNum}/>)
           }
           return hands
         },
@@ -258,8 +256,9 @@
           this.setState({gameText: message})
         },
 
-        gameInit: function(game) { 
-          var state = JSON.parse(game)
+        gameInit: function(game) {
+          console.log('game: ' + game)
+          state = game
           state.gameText = (state.whoseTurn === yourPlayerNum) ? "Your turn" : "Player " + state.whoseTurn + "'s turn"
           this.setState(state) 
         },
@@ -269,7 +268,7 @@
             <div className="wholegame">
               <TeamPiles cards={this.state.teamPiles}/>
               <Discards cards={this.state.discards}/>
-              <AllPlayers count={this.state.playerCount} hands={this.state.hands} yourCards={this.state.hands[yourPlayerNum].length}/>
+              <AllPlayers count={this.state.playerCount} hands={this.state.hands} yourCards={this.state.yourCards}/>
               <CluesLivesDeck deckLength={this.state.deckLength} clues={this.state.clues} lives={this.state.lives}/>
               <GameText text={this.state.gameText}/>
             </div>

@@ -23,7 +23,7 @@ function allUserNames(userList) {
   nameObjs = []
 
   Object.keys(userList).forEach(function(session, index) {
-    if (userList.hasOwnProperty(session)) {
+    if (userList[session]) {
       nameObjs.push({
         id: index,
         name: userList[session].name
@@ -35,7 +35,13 @@ function allUserNames(userList) {
 }
 
 function keyCount(obj) {
-  Object.keys(obj).length
+  console.log(Object.keys(obj))
+  var count = 0
+  Object.keys(obj).forEach(function(key) {
+    if (obj.hasOwnProperty(key))
+      count++
+  })
+  return count
 }
 
 function User (name, socket) {
@@ -51,9 +57,9 @@ User.prototype.updateSocket = function(socket) {
   this.socket = socket
 }
 
-User.prototype.removeSocket = function() {
-  this.socket = undefined
-}
+// User.prototype.removeSocket = function() {
+//   this.socket = undefined
+// }
 
 function makeUser(name, session, socket) {
   if (!users[session])
@@ -67,88 +73,93 @@ function makeUser(name, session, socket) {
 function matchSocket(session, socket) {
   var socketExists = false
 
-  if (users[session]) {
-    users[session].updateSocket(socket)
-    socketExists = true
-  }
   if (gameUsers[session]) {
     gameUsers[session].updateSocket(socket)
+    socketExists = true
+  } else if (users[session]) {
+    users[session].updateSocket(socket)
     socketExists = true
   }
 
   return socketExists
 }
 
-function removeSocket(session) {
-  if (!(gameUsers.hasOwnProperty(session) || 
-        users.hasOwnProperty(session)))
-    return
+// function removeSocket(session) {
+//   if (!(gameUsers.hasOwnProperty(session) || 
+//         users.hasOwnProperty(session)))
+//     return
 
-  if (gameUsers.hasOwnProperty(session)) {
-    gameUsers[session].socket = undefined
-  }
+//   if (gameUsers.hasOwnProperty(session)) {
+//     gameUsers[session].socket = undefined
+//   }
 
-  if (users.hasOwnProperty(session)) {
-    users[session].socket = undefined
-  }
-}
+//   if (users.hasOwnProperty(session)) {
+//     users[session].socket = undefined
+  // }
+// }
 
 function lockInUsers() {
+
   Object.keys(users).forEach(function(session, index) {
-    gameUsers[session] = users[session]
-    gameUsers[session].playerNum = index
+    if (users[session]) {
+      gameUsers[session] = users[session]
+      gameUsers[session].playerNum = index
 
-    gameUsers[session].addGameHandlers = function() {
-      this.socket.on('clue', function(clue){
-        clue = JSON.parse(clue)
-        try {
-          var matching = game.giveClue(clue.giver, 
-            clue.recipient, clue.suitOrNumber)
-          updatePlayers()
-        }
-        catch(err) {
-          this.socket.emit('erra', err.message)
-          console.log(err.message)
-        }
-      })
-      this.socket.on('playCard', function(play){
-        play = JSON.parse(play)
-        try {
-          game.playCard(play.player, play.cardIndex)
-          updatePlayers()
-        }
-        catch(err) {
-          this.socket.emit('erra', err.message)
-          console.log(err.message)
-        }
-      })
-      this.socket.on('discard' , function(discard){
-        discard = JSON.parse(discard)
-        try {
-          io.discard(discard.player, discard.cardIndex)
-          updatePlayers()
-        }
-        catch(err) {
-          this.socket.emit('erra', err.message)
-          console.log(err.message)
-        }
-      })
+      gameUsers[session].addGameHandlers = function() {
+        this.socket.on('clue', function(clue){
+          clue = JSON.parse(clue)
+          try {
+            var matching = game.giveClue(clue.giver, 
+              clue.recipient, clue.suitOrNumber)
+            updatePlayers()
+          }
+          catch(err) {
+            console.log(err.message)
+            this.socket.emit('erra', err.message)
+          }
+        }.bind(this))
+        this.socket.on('playCard', function(play){
+          console.log("PLAYING CARD");
+          play = JSON.parse(play)
+          try {
+            game.playCard(play.player, play.cardIndex)
+            updatePlayers()
+          }
+          catch(err) {
+            console.log(err.message)
+            this.socket.emit('erra', err.message)
+          }
+        }.bind(this))
+        this.socket.on('discard' , function(discard){
+          discard = JSON.parse(discard)
+          try {
+            game.discard(discard.player, discard.cardIndex)
+            updatePlayers()
+          }
+          catch(err) {
+            console.log(err.message)
+            this.socket.emit('erra', err.message)
+          }
+        }.bind(this))
+      }
+      
+
+      gameUsers[session].updateSocket = function(socket) {
+        console.log("Updating socket")
+        this.socket = socket
+        this.addGameHandlers()
+        this.socket.emit('youAre', this.playerNum)
+        updateOnePlayer(gameUsers[session])
+      }
     }
-
-    gameUsers[session].updateSocket = function(socket) {
-      this.socket = socket
-      this.addGameHandlers()
-      this.socket.emit('youAre', this.playerNum)
-      updateOnePlayer(gameUsers[session])
-    }
-
-    users[session] = undefined
   })
 }
 
 function sayGameIsStarting() {
   Object.keys(gameUsers).forEach(function(session) {
-    gameUsers[session].socket.emit('gameIsStarting')
+    console.log(session)
+    if (gameUsers[session])
+      gameUsers[session].socket.emit('gameIsStarting')
   })
 }
 
@@ -158,15 +169,12 @@ function startGame() {
   }
   else {
     game = new Game(keyCount(users))
+    console.log(keyCount(users))
+    console.log(game)
     lockInUsers()
     sayGameIsStarting()
     return true
   }
-}
-
-function updateSocketOnPlayer(socket) {
-  this.socket = socket
-  this.addGameHandlers()
 }
 
 function updatePlayers() {
@@ -176,7 +184,8 @@ function updatePlayers() {
 }
 
 function updateOnePlayer(user) {
-  user.socket.emit('gameInit', user.playerNum)
+  console.log('updating ' + user.name)
+  user.socket.emit('gameInit', stringifyGame(game, user.playerNum))
 }
 
 function stringifyGame(game, forPlayer) {
@@ -201,9 +210,9 @@ function stringifyGame(game, forPlayer) {
     whoseTurn: game.turn
   }
 
-  toSend.hands.splice(forPlayer, 1)
+  toSend.hands[forPlayer] = undefined
 
-  return JSON.stringify(toSend)
+  return toSend
 }
 
 app.use(cookieParser())
@@ -241,6 +250,8 @@ app.get('/hanabi.png', function(req, res){
 })
 
 io.sockets.on('connection', function(socket){
+  console.log('connected')
+
   var session = cookie.parse(socket.handshake.headers.cookie)['connect.sid']
 
   if (matchSocket(session, socket))
@@ -267,7 +278,8 @@ io.sockets.on('connection', function(socket){
   })
 
   socket.on('disconnect', function() {
-    removeSocket(session)
+    console.log('disconnected')
+    // removeSocket(session)
   })
 })
 
