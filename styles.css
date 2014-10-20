@@ -1,4 +1,4 @@
-@import url(http://fonts.googleapis.com/css?family=Indie+Flower);
+@import url(http://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic);
 
 .visCard, .invisCard {
   border: 1px solid;
@@ -71,7 +71,7 @@
 /* styling for index.html */
 body {
   color: white;
-  font-family: 'Indie Flower', cursive;
+  font-family: 'Roboto', sans-serif;
   background-color: #11083f;
 }
 div#main {
@@ -82,9 +82,20 @@ div#main {
   border: 5px solid #7853a3;
   position: relative;
 }
+div#players {
+  background-color: rgba(10, 10, 10, 0.8);
+  width: 395px;
+  height: 400px;
+  padding: 20px;
+  border-radius: 15px;
+
+  position: absolute;
+  left: 10px;
+  top: 250px;
+}
 div#chat {
   background-color: rgba(10, 10, 10, 0.8);
-  width: 400px;
+  width: 395px;
   height: 400px;
   padding: 20px;
   border-radius: 15px;
@@ -99,18 +110,48 @@ div#chat dl {
   padding: 0px;
   margin: 0px;
 }
-div#chat .overflow-wrapper {
+.overflow-wrapper {
   overflow: scroll;
 }
-div#chat form {
+form {
   position: absolute;
   bottom: 0px;
   width: 100%;
 }
-div#chat form input {
+form input {
   width: 70%;
 }
-div#chat form button {
+form button {
   width: 20%;
   margin: 0 10px;
+}
+div#start {
+  position: absolute;
+  top: 120px;
+  left: 60px;
+}
+div#start .button {
+  font-size:28px;
+}
+.button {
+  -moz-box-shadow: 0px 10px 14px -7px #11083f;
+  -webkit-box-shadow: 0px 10px 14px -7px #11083f;
+  box-shadow: 0px 10px 14px -7px #11083f;
+  background-color:#7853a3;
+  -moz-border-radius:4px;
+  -webkit-border-radius:4px;
+  border-radius:4px;
+  border:1px solid #11083f;
+  display:inline-block;
+  cursor:pointer;
+  color:#ffffff;
+  font-weight:bold;
+  padding:6px 12px;
+  text-decoration:none;
+  text-shadow:0px 3px 4px #11083f;
+}
+.button:disabled {
+  background-color: grey;
+  color: lightgrey;
+  cursor: auto;
 }
