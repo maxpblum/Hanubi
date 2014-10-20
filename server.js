@@ -13,6 +13,9 @@ app.get('/game', function(req, res){
 app.get('/styles.css', function(req, res){
   res.sendFile(path.resolve('./styles.css'))
 });
+app.get('/hanabi.png', function(req, res){
+  res.sendFile(path.resolve('./hanabi.png'))
+});
 app.get('/react', function(req, res){
   res.sendFile(path.resolve('./build/react.js'))
 });

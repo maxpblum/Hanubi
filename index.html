@@ -7,26 +7,29 @@
     <script src="JSXTransformer"></script>
     <script src="jquery"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <style>
-      button {
-        margin-left: 10px;
-      }
-
-    </style>
   </head>
   <body>
-    <div id="header"><h1>Welcome to HaNaNabi!</h1></div>
-    <div id="content"></div>
+    <div id="main">
+      <div id="start">
+        <button disabled="true" class="button">Start Game</button>
+      </div>
+      <div id="players"></div>
+      <div id="chat"></div>
+    </div>
     <script type="text/jsx">
       /** @jsx React.DOM */
       // The above declaration must remain intact at the top of the script.
 
-      var socket;
+      var startGame = function() {
+        console.log("TODO: Start the game");
+      };
+
+      var socket = io("http://localhost:3001");
 
       var Status = React.createClass({
         render: function() {
           if(this.props.connected) {
-            return <div>There are currently {this.props.players} players connected</div>
+            return <div>There are currently {this.props.players} players connected.</div>
           } else {
             return <div>Server is down. I repeat: The server is down! Panic is advisable!</div>
           }
@@ -42,9 +45,48 @@
         }
       });
 
+      var Chat = React.createClass({
+        getInitialState: function() {
+          socket.on('chat', function(message) {
+            var messages = this.state.messages;
+            messages.push(message);
+            this.setState({messages: messages});
+            // Scroll to bottom to see the new message
+            var wrapper = document.getElementsByClassName("overflow-wrapper")[0];
+            wrapper.scrollTop = wrapper.scrollHeight;
+          }.bind(this));
+          return {message: "", messages: []}
+        },
+        show: function(message) {
+          return [<dt>{message.name}</dt>,
+                  <dd>{message.text}</dd>]
+        },
+        emitMessage: function(e) {
+          e.preventDefault();
+          var message = this.state.message;
+          socket.emit('chat', message); 
+        },
+        onChange: function(e) {
+          var message = e.target.value;
+          this.setState({message: message});
+        },
+        render: function() {
+          return (
+            <div className='chat'>
+              <div className='overflow-wrapper'>
+                <dl>{this.state.messages.map(this.show)}</dl>
+              </div>
+              <form onSubmit={this.emitMessage}>
+                <input onChange={this.onChange} value={this.state.message} />
+                <button className='button send' disabled='true'>Send</button>
+              </form>
+            </div>
+          )
+        }
+      });
+
       var HaNaNabi = React.createClass({
         getInitialState: function() {
-          socket = io("http://10.0.6.159:3000");
           socket.on('disconnect', function () {
             this.setState({players: [], connected: false});
           }.bind(this));
@@ -54,10 +96,20 @@
           socket.on("allPlayers", function(data) {
             this.setState({
               players: data, 
-              disabled: {start: (data.length < 2 && data.length > 5), join: this.state.disabled.join}
+              disabled: {join: this.state.disabled.join}
             });
+            this.checkStart();
           }.bind(this));
           return {players: [], disabled: {join: true, start: true}};
+        },
+
+        checkStart: function() {
+          var players = this.state.players.length;
+          if(players < 2 || players > 5) {
+              $('#start button').attr('disabled');
+          } else {
+              $('#start button').removeAttr('disabled');
+          }
         },
 
         onChange: function(e) {
@@ -67,11 +119,11 @@
 
         handleSubmit: function(e) {
           e.preventDefault();
+          name = this.state.name;
           socket.emit("join", this.state.name);
-        },
-
-        startGame: function() {
-          console.log("TODO: Start the game");
+          $('form.name button').attr('disabled', 'true');
+          $('button.send').removeAttr('disabled');
+          this.checkStart();
         },
 
         render: function() {
@@ -79,18 +131,18 @@
             <div>
               <Status connected={this.state.connected} players={this.state.players.length} />
               <PlayerList players={this.state.players} />
-              <form onSubmit={this.handleSubmit}>
+              <form className='name' onSubmit={this.handleSubmit}>
                 <input onChange={this.onChange} value={this.state.name} />
-                <button disabled={this.state.disabled.join}>Join game</button>
+                <button className='button' disabled={this.state.disabled.join}>Join game</button>
               </form>
-              <button disabled={this.state.disabled.start} onClick={this.startGame}>Start game</button>
             </div>
           );
         }
       
       });
 
-      React.renderComponent(<HaNaNabi />, document.getElementById('content'));
+      React.renderComponent(<HaNaNabi />, document.getElementById('players'));
+      React.renderComponent(<Chat />, document.getElementById('chat'));
     </script>
   </body>
 </html>
