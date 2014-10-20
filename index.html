@@ -65,6 +65,7 @@
           e.preventDefault();
           var message = this.state.message;
           socket.emit('chat', message); 
+          this.setState({message: ''});
         },
         onChange: function(e) {
           var message = e.target.value;
@@ -77,7 +78,7 @@
                 <dl>{this.state.messages.map(this.show)}</dl>
               </div>
               <form onSubmit={this.emitMessage}>
-                <input onChange={this.onChange} value={this.state.message} />
+                <input id='chat-message' onChange={this.onChange} value={this.state.message} />
                 <button className='button send' disabled='true'>Send</button>
               </form>
             </div>
