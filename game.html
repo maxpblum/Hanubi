@@ -16,7 +16,8 @@
 
       var socket
       var state
-      var yourPlayerNum = 0
+      var nonGameState
+      var yourPlayerNum = undefined
 
       var VisCard = React.createClass({
         showDialog: function(recipient, suit, number) {
@@ -230,6 +231,54 @@
         }
       })
 
+      var nonGame = React.createClass({
+        joinNew: function () {
+          if (socket)
+            socket.emit('joinNew', '')
+        },
+
+        joinPaused: function(seatNum) {
+          if (socket)
+            socket.emit('joinPaused', seatNum)
+        },
+
+        render: function() {
+          var youAreOne = 
+            <span id="yourNewGameStatus">"You are one of them!"</span>
+
+          var joinButton =
+            <button id="joinNew" onClick={this.joinNew}>Join new game</button>
+
+          var newGame = 
+            <div className="newGame">
+              <span id="playersWaiting">There are {nonGameState.playersWaiting} players waiting to start a new game.</span>
+              {nonGameState.youveJoined ? youAreOne : joinButton}
+            </div>
+
+          var openSeatButtons = nonGameState.openSeats.map(function(seatNum) {
+            return <button className="seatButton" onClick={function(){
+              this.joinPaused(seatNum)
+            }.bind(this)}>{seatNum}</button>
+          })
+
+          var openSeatDialog = 
+            <div className="openSeatDialog">
+              Here are the available seats:
+              {openSeatButtons}
+            </div>
+
+          var gameIsPaused = <span id="pausedGame">The game is paused.</span>
+
+          var pausedGame = yourPlayerNum ? gameIsPaused : openSeatDialog
+
+          return(
+            <div className="nonGameScreen">
+              {this.props.gameExists ? pausedGame : newGame}
+            </div>
+          )
+        }
+      })
+
       var WholeGame = React.createClass({
         getInitialState: function() {
 
@@ -243,19 +292,11 @@
 
           socket.on('gameInit', this.gameInit)
 
+          socket.on('nonGame', this.nonGameUpdate)
+
           socket.on('erra', this.showError)
 
-          socket.on('numPlayers', this.numPlayersUpdate)
-
-          state = {gameText: "No connection yet?",
-                  connected: 0,
-                  hands: [[0]],
-                  teamPiles: [],
-                  discards: [],
-                  gameExists: false,
-                  yourPlayerNum: 0}
-
-          return state
+          return nonGameState ? nonGameState : null
         },
 
         assignPlayerNum: function(numStr) {
@@ -263,49 +304,25 @@
           this.render()
         },
 
-        numPlayersUpdate: function(numStr) {
-          var num = parseInt(numStr)
-          this.setState({connected: numStr})
-        },
-
         showError: function(message) {
           this.setState({gameText: message})
         },
 
+        nonGameUpdate: function(nonGame) {
+          nonGameState = JSON.parse(nonGame)
+          this.setState(nonGameState)
+          state = {}
+        },
+
         gameInit: function(game) { 
-          console.log('gameInit')
-          if (!this.state.gameExists)
-            this.setState({gameExists: true})
-          var state = JSON.parse(game)
+          nonGameState = {}
+          state = JSON.parse(game)
           state.gameText = (state.whoseTurn === yourPlayerNum) ? "Your turn" : "Player " + state.whoseTurn + "'s turn"
-          window.state = state
           this.setState(state) 
         },
 
-        enoughPlayers: function() {
-          return this.state.connected >= 2
-        },
-
-        startGame: function() {
-          socket.emit('startGame', '')
-        },
-
-        stopGame: function() {
-          this.setState(this.getInitialState())
-        },
-
-        noGameYetWindow: function() {
-          var div = <div>
-            There are {this.state.connected} players connected.
-            {console.log(this.enoughPlayers())}
-            <button disabled={!this.enoughPlayers()} onClick={this.startGame}>Start Game</button>
-          </div>
-
-          return div
-        },
-
         render: function() {
-          if (this.state.gameExists) {
+          if (state){
             return(
               <div className="wholegame">
                 <TeamPiles cards={this.state.teamPiles}/>
@@ -315,10 +332,12 @@
                 <GameText text={this.state.gameText}/>
               </div>
             )
+          } else if (nonGameState) {
+            return <nonGame gameExists={nonGameState.paused} />
+          } else {
+            return <span id="nothingYet">No connection yet.</span>
           }
-          else {
-            return this.noGameYetWindow()
-          }
+
         }
       })
 
@@ -337,9 +356,6 @@
       <button id="playCard">Play Card</button>
       <button id="discard">Discard</button>
       <button id="cancelPDWindow">x</button>
-    </dialog>
-    <dialog id="noGameYetWindow">
-      <button id="start">Start Game</button>
     </dialog>
   </body>
 </html>
