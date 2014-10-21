@@ -16,6 +16,7 @@
 
       var socket
       var state
+      var gameText = "No connection yet?"
       var yourPlayerNum = 0
 
       var VisCard = React.createClass({
@@ -178,8 +179,8 @@
         makeHands: function(listOfHands) {
           var hands = []
           for (var h = 0; h < listOfHands.length; h++) {
-            if (hands[h])
-              hands.push(<OtherHand cards={listOfHands[h]} playerNum={playerNum}/>)
+            if (listOfHands[h])
+              hands.push(<OtherHand cards={listOfHands[h]} playerNum={h}/>)
           }
           return hands
         },
@@ -220,7 +221,7 @@
         render: function() {
           return(
             <div className="gameText">
-              {this.props.text}
+              {gameText}
             </div>
           )
         }
@@ -243,8 +244,7 @@
 
           socket.on('erra', this.showError)
 
-          state = {gameText: "No connection yet?",
-                  hands: [[0]],
+          state = {hands: [[0]],
                   teamPiles: [],
                   discards: [],
                   yourPlayerNum: 0}
@@ -253,14 +253,17 @@
         },
 
         showError: function(message) {
-          this.setState({gameText: message})
+          gameText += "\n" + message
+          this.setState(state)
         },
 
         gameInit: function(game) {
           console.log('game: ' + game)
           state = game
-          state.gameText = (state.whoseTurn === yourPlayerNum) ? "Your turn" : "Player " + state.whoseTurn + "'s turn"
-          this.setState(state) 
+          turnMessage = (state.whoseTurn === yourPlayerNum) ? "Your turn" : "Player " + state.whoseTurn + "'s turn"
+          turnMessage = "\n" + turnMessage
+          gameText += turnMessage
+          this.setState(state)
         },
 
         render: function() {
@@ -270,7 +273,7 @@
               <Discards cards={this.state.discards}/>
               <AllPlayers count={this.state.playerCount} hands={this.state.hands} yourCards={this.state.yourCards}/>
               <CluesLivesDeck deckLength={this.state.deckLength} clues={this.state.clues} lives={this.state.lives}/>
-              <GameText text={this.state.gameText}/>
+              <GameText text={gameText}/>
             </div>
           )
         }

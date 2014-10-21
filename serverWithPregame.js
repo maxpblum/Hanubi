@@ -12,9 +12,9 @@ var game
 var gameUsers = {}
 var users = {}
 
-function getPlayerNum(session) {
-  if (gameUsers[session])
-    return gameUsers[session].playerNum
+function getPlayerNum(sessionID) {
+  if (gameUsers[sessionID])
+    return gameUsers[sessionID].playerNum
   else
     return false
 }
@@ -22,11 +22,11 @@ function getPlayerNum(session) {
 function allUserNames(userList) {
   nameObjs = []
 
-  Object.keys(userList).forEach(function(session, index) {
-    if (userList[session]) {
+  Object.keys(userList).forEach(function(sessionID, index) {
+    if (userList[sessionID]) {
       nameObjs.push({
         id: index,
-        name: userList[session].name
+        name: userList[sessionID].name
       })
     }
   })
@@ -61,51 +61,51 @@ User.prototype.updateSocket = function(socket) {
 //   this.socket = undefined
 // }
 
-function makeUser(name, session, socket) {
-  if (!users[session])
-    users[session] = new User(name, socket)
+function makeUser(name, sessionID, socket) {
+  if (!users[sessionID])
+    users[sessionID] = new User(name, socket)
   else {
-    users[session].updateName(name)
-    users[session].updateSocket(socket)
+    users[sessionID].updateName(name)
+    users[sessionID].updateSocket(socket)
   }
 }
 
-function matchSocket(session, socket) {
+function matchSocket(sessionID, socket) {
   var socketExists = false
 
-  if (gameUsers[session]) {
-    gameUsers[session].updateSocket(socket)
+  if (gameUsers[sessionID]) {
+    gameUsers[sessionID].updateSocket(socket)
     socketExists = true
-  } else if (users[session]) {
-    users[session].updateSocket(socket)
+  } else if (users[sessionID]) {
+    users[sessionID].updateSocket(socket)
     socketExists = true
   }
 
   return socketExists
 }
 
-// function removeSocket(session) {
-//   if (!(gameUsers.hasOwnProperty(session) || 
-//         users.hasOwnProperty(session)))
+// function removeSocket(sessionID) {
+//   if (!(gameUsers.hasOwnProperty(sessionID) || 
+//         users.hasOwnProperty(sessionID)))
 //     return
 
-//   if (gameUsers.hasOwnProperty(session)) {
-//     gameUsers[session].socket = undefined
+//   if (gameUsers.hasOwnProperty(sessionID)) {
+//     gameUsers[sessionID].socket = undefined
 //   }
 
-//   if (users.hasOwnProperty(session)) {
-//     users[session].socket = undefined
+//   if (users.hasOwnProperty(sessionID)) {
+//     users[sessionID].socket = undefined
   // }
 // }
 
 function lockInUsers() {
 
-  Object.keys(users).forEach(function(session, index) {
-    if (users[session]) {
-      gameUsers[session] = users[session]
-      gameUsers[session].playerNum = index
+  Object.keys(users).forEach(function(sessionID, index) {
+    if (users[sessionID]) {
+      gameUsers[sessionID] = users[sessionID]
+      gameUsers[sessionID].playerNum = index
 
-      gameUsers[session].addGameHandlers = function() {
+      gameUsers[sessionID].addGameHandlers = function() {
         this.socket.on('clue', function(clue){
           clue = JSON.parse(clue)
           try {
@@ -144,22 +144,22 @@ function lockInUsers() {
       }
       
 
-      gameUsers[session].updateSocket = function(socket) {
+      gameUsers[sessionID].updateSocket = function(socket) {
         console.log("Updating socket")
         this.socket = socket
         this.addGameHandlers()
         this.socket.emit('youAre', this.playerNum)
-        updateOnePlayer(gameUsers[session])
+        updateOnePlayer(gameUsers[sessionID])
       }
     }
   })
 }
 
 function sayGameIsStarting() {
-  Object.keys(gameUsers).forEach(function(session) {
-    console.log(session)
-    if (gameUsers[session])
-      gameUsers[session].socket.emit('gameIsStarting')
+  Object.keys(gameUsers).forEach(function(sessionID) {
+    console.log(sessionID)
+    if (gameUsers[sessionID])
+      gameUsers[sessionID].socket.emit('gameIsStarting')
   })
 }
 
@@ -178,8 +178,8 @@ function startGame() {
 }
 
 function updatePlayers() {
-  Object.keys(gameUsers).forEach(function(session){
-    updateOnePlayer(gameUsers[session])
+  Object.keys(gameUsers).forEach(function(sessionID){
+    updateOnePlayer(gameUsers[sessionID])
   })
 }
 
@@ -252,22 +252,23 @@ app.get('/hanabi.png', function(req, res){
 io.sockets.on('connection', function(socket){
   console.log('connected')
 
-  var session = cookie.parse(socket.handshake.headers.cookie)['connect.sid']
+  var sessionID = cookie.parse(socket.handshake.headers.cookie)['connect.sid']
 
-  if (matchSocket(session, socket))
+  if (matchSocket(sessionID, socket))
     socket.emit('joined')
 
   socket.emit('allPlayers', allUserNames(users))
 
   socket.on('join', function (name) {
-    makeUser(name, session, socket)
+    console.log(sessionID)
+    makeUser(name, sessionID, socket)
     socket.emit('joined')
     io.sockets.emit('allPlayers', allUserNames(users))
   })
 
   socket.on('chat', function(text) {
-    if (users[session])
-      io.sockets.emit('chat', { name: users[session].name, text: text })
+    if (users[sessionID])
+      io.sockets.emit('chat', { name: users[sessionID].name, text: text })
     else
       socket.emit('erra', 'ENTER A FREAKIN NAME')
   })
@@ -279,7 +280,7 @@ io.sockets.on('connection', function(socket){
 
   socket.on('disconnect', function() {
     console.log('disconnected')
-    // removeSocket(session)
+    // removeSocket(sessionID)
   })
 })
 
