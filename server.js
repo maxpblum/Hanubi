@@ -4,28 +4,6 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var Game = require('./game')
 
-app.get('/', function(req, res){
-  res.sendFile(path.join(__dirname, 'index.html'))
-});
-app.get('/game', function(req, res){
-  res.sendFile(path.join(__dirname, 'game.html'))
-});
-app.get('/styles.css', function(req, res){
-  res.sendFile(path.resolve('./styles.css'))
-});
-app.get('/hanabi.png', function(req, res){
-  res.sendFile(path.resolve('./hanabi.png'))
-});
-app.get('/react', function(req, res){
-  res.sendFile(path.resolve('./build/react.js'))
-});
-app.get('/JSXTransformer', function(req, res){
-  res.sendFile(path.resolve('./build/JSXTransformer.js'))
-});
-app.get('/jquery', function(req, res){
-  res.sendFile(path.resolve('./build/jquery-1.11.1.js'))
-});
-
 var game = new Game(2)
 var socketToPlayer = {}
 var playerToSocket = []
@@ -122,6 +100,6 @@ io.on('connection', function(socket){
 
 });
 
-http.listen(3000, function(){
-  console.log('listening on *:3000')
+http.listen(3001, function(){
+  console.log('listening on *:3001')
 })

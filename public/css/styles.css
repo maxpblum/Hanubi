@@ -78,7 +78,7 @@ div#main {
   width: 900px;
   height: 700px;
   margin: 10px auto;
-  background: #11083f url(/hanabi.png) no-repeat left top;
+  background: #11083f url(/img/hanabi.png) no-repeat left top;
   border: 5px solid #7853a3;
   position: relative;
 }

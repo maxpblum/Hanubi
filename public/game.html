@@ -2,10 +2,10 @@
 <html>
   <head>
     <title>JSHanabi</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
-    <script src="react"></script>
-    <script src="JSXTransformer"></script>
-    <script src="jquery"></script>
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <script src="js/react.js"></script>
+    <script src="js/JSXTransformer.js"></script>
+    <script src="js/jquery-1.11.1.js"></script>
     <script src="/socket.io/socket.io.js"></script>
   </head>
   <body>
@@ -230,7 +230,7 @@
       var WholeGame = React.createClass({
         getInitialState: function() {
 
-          socket = io()
+          socket = io(":3001")
 
           socket.on('connect', function() {
             this.setState({text: "Connect"});
