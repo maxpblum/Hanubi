@@ -1,0 +1,25 @@
+<!-- template.html -->
+<html>
+  <head>
+    <title>JSHanabi</title>
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <script src="js/react.js"></script>
+    <script src="js/JSXTransformer.js"></script>
+    <script src="js/jquery-1.11.1.js"></script>
+    <script src="socket.io.js"></script>
+  </head>
+  <body>
+    <div id="main">
+    </div>
+    <script type="text/jsx">
+      /** @jsx React.DOM */
+      // The above declaration must remain intact at the top of the script.
+
+      var socket = io(":3001");
+      socket.on('ack', function(data) {
+        console.log(data);
+      });
+
+    </script>
+  </body>
+</html>

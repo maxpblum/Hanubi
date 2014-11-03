@@ -1,6 +1,7 @@
 {
   "name": "Hanubi",
   "dependencies": {
+    "connect": "^3.3.2",
     "socket.io": "~1.0.0"
   },
   "devDependencies": {
@@ -11,7 +12,8 @@
     "grunt": "~0.4.1",
     "grunt-concurrent": "~0.4.2",
     "grunt-contrib-connect": "^0.8.0",
-    "grunt-nodemon": "^0.3.0"
+    "grunt-nodemon": "^0.3.0",
+    "session.socket.io": "^0.1.6"
   },
   "engines": {
     "node": ">=0.10.0"

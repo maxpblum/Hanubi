@@ -13,7 +13,7 @@ module.exports = function(grunt) {
     },
     nodemon: {
       dev: {
-        script: 'serverWithPregame.js'
+        script: 'hserver.js'
       }
     }
   });
