@@ -16,11 +16,10 @@
       // The above declaration must remain intact at the top of the script.
 
       var startGame = function() {
-        console.log("emitting startGame")
         socket.emit("startGame");
       };
 
-      var socket = io(":3001/main");
+      var socket = io(":3001");
 
       var Status = React.createClass({
         render: function() {
@@ -51,7 +50,8 @@
         },
         handleSubmit: function(e) {
           e.preventDefault();
-          socket.emit("join", this.state.name);
+          socket.emit("rename", this.state.name);
+          this.setState({name: ""});
         },
         render: function() {
           var createPlayer = function(player) {
@@ -63,7 +63,7 @@
               <ul>{this.props.players.map(createPlayer)}</ul>
               <form className='name' onSubmit={this.handleSubmit}>
                 <input onChange={this.onChange} value={this.state.name} />
-                <button className='button' disabled={!this.state.name}>Join game</button>
+                <button className='button' disabled={!this.state.name}>Rename</button>
               </form>
             </div>
           )
@@ -71,8 +71,9 @@
       });
 
       var Chat = React.createClass({
+        chat: io(":3001/chat"),
         getInitialState: function() {
-          socket.on('chat', function(message) {
+          this.chat.on('chat', function(message) {
             var messages = this.state.messages;
             messages.push(message);
             this.setState({messages: messages});
@@ -89,7 +90,7 @@
         emitMessage: function(e) {
           e.preventDefault();
           var message = this.state.message;
-          socket.emit('chat', message); 
+          this.chat.emit('chat', message); 
           this.setState({message: ''});
         },
         onChange: function(e) {
@@ -104,7 +105,7 @@
               </div>
               <form onSubmit={this.emitMessage}>
                 <input id='chat-message' onChange={this.onChange} value={this.state.message} />
-                <button className='button send' disabled={!this.props.joined}>Send</button>
+                <button className='button send'>Send</button>
               </form>
             </div>
           )
@@ -114,16 +115,11 @@
       var HaNaNabi = React.createClass({
         getInitialState: function() {
           socket.on('disconnect', function () {
-            this.setState({players: [], connected: false, joined: false});
+            this.setState({players: [], connected: false});
           }.bind(this));
 
           socket.on('connect', function () {
             this.setState({connected: true});
-          }.bind(this));
-
-          socket.on('joined', function() {
-            console.log("Should set state joined to true");
-            this.setState({joined: true});
           }.bind(this));
 
           socket.on('gameIsStarting', function() {
@@ -131,20 +127,20 @@
             window.location.href = '/game';
           });
 
-          socket.on("allPlayers", function(data) {
+          socket.on("players", function(data) {
             this.setState({players: data, start: data.length > 1 && data.length < 6});
           }.bind(this));
           
           // TODO change start state
-          return {players: [], start: false, joined: false};
+          return {players: [], start: false};
         },
 
         render: function() {
           return (
             <div>
               <Start enabled={this.state.start}/>,
-              <PlayersList players={this.state.players} connected={this.state.connected} joined={this.state.joined} />,
-              <Chat joined={this.state.joined} />
+              <PlayersList players={this.state.players} connected={this.state.connected} />,
+              <Chat />
             </div>
           );
         }

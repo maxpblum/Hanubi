@@ -1,23 +1,24 @@
 var _    = require('underscore');
 
-
 var UserHandler = function(io) {
   
-
   users = {};
   this.connected = function() {
     return users;
   };
 
   this.emit = function() {
-    var names = _.values(users).map(function(user) {
-      return user.name;
+    var names = _.pairs(users).map(function(user) {
+      return {id: user[0], name: user[1].name};
     });
     io.emit('players', names);
+    console.log("Emitted " + names.length + " player name(s)");
   }
 
   var connect = function(id) {
-    users[id].connected = true;
+    var user = users[id];
+    user.connected = true;
+    console.log("User '" + user.name + "' with id '" + id + "' connected");
     this.emit();
     return users[id];
   }.bind(this);
