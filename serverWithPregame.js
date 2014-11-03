@@ -70,19 +70,19 @@ function makeUser(name, sessionID, socket) {
   }
 }
 
-function matchSocket(sessionID, socket) {
-  var socketExists = false
+// function matchSocket(sessionID, socket) {
+//   var socketExists = false
 
-  if (gameUsers[sessionID]) {
-    gameUsers[sessionID].updateSocket(socket)
-    socketExists = true
-  } else if (users[sessionID]) {
-    users[sessionID].updateSocket(socket)
-    socketExists = true
-  }
+//   if (gameUsers[sessionID]) {
+//     gameUsers[sessionID].updateSocket(socket)
+//     socketExists = true
+//   } else if (users[sessionID]) {
+//     users[sessionID].updateSocket(socket)
+//     socketExists = true
+//   }
 
-  return socketExists
-}
+//   return socketExists
+// }
 
 // function removeSocket(sessionID) {
 //   if (!(gameUsers.hasOwnProperty(sessionID) || 
@@ -227,35 +227,16 @@ app.use(session({
   }
 }))
 
-app.get('/', function(req, res, next) {
-  res.sendFile(path.resolve('./index.html'))
-})
-app.get('/game', function(req, res){
-  res.sendFile(path.resolve('./game.html'))
-})
-app.get('/styles.css', function(req, res){
-  res.sendFile(path.resolve('./styles.css'))
-})
-app.get('/react', function(req, res){
-  res.sendFile(path.resolve('./build/react.js'))
-})
-app.get('/JSXTransformer', function(req, res){
-  res.sendFile(path.resolve('./build/JSXTransformer.js'))
-})
-app.get('/jquery', function(req, res){
-  res.sendFile(path.resolve('./build/jquery-1.11.1.js'))
-})
-app.get('/hanabi.png', function(req, res){
-  res.sendFile(path.resolve('./hanabi.png'))
-})
+var chat = io.of('/main')
 
-io.sockets.on('connection', function(socket){
-  console.log('connected')
+chat.on('connection', function(socket){
+  console.log(socket.id + 'connected')
 
   var sessionID = cookie.parse(socket.handshake.headers.cookie)['connect.sid']
+  console.log('sessionID is ' + sessionID)
 
-  if (matchSocket(sessionID, socket))
-    socket.emit('joined')
+  // if (matchSocket(sessionID, socket))
+  //   socket.emit('joined')
 
   socket.emit('allPlayers', allUserNames(users))
 
