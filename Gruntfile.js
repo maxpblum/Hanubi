@@ -7,7 +7,16 @@ module.exports = function(grunt) {
         options: {
           port: 3000,
           hostname: "*",
+          keepalive: true,
           base: ['public', 'node_modules/socket.io/node_modules/socket.io-client']
+        }
+      }
+    },
+    concurrent: {
+      server: {
+        tasks: ['connect', 'nodemon'],
+        options: {
+          logConcurrentOutput: true
         }
       }
     },
@@ -24,7 +33,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('server', 'Serving files and starting node.js session', function(target) {
     grunt.task.run([
-      'connect', 'nodemon'
+      'concurrent'
     ]);
   });
 };
