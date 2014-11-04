@@ -122,9 +122,9 @@
             this.setState({connected: true});
           }.bind(this));
 
-          socket.on('gameIsStarting', function() {
+          socket.on('gameIsStarting', function(gameID) {
           console.log("Should redirect");
-            window.location.href = '/game';
+            window.location.href = '/game.html?gameID=' + gameID;
           });
 
           socket.on("players", function(data) {

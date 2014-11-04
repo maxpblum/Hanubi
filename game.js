@@ -160,4 +160,32 @@ Game.prototype.giveClue = function(playerIndex, clueRecipientIndex, suitOrValue)
   return matching
 }
 
+Game.prototype.stringify = function (forPlayer) {
+
+  var toSend = {
+    playerCount: this.getPlayers().length,
+    hands: this.getPlayers().map(function(player) {
+      return player.getCards()
+    }),
+    deckLength: this.getDeckLength(),
+    clues: this.clues,
+    lives: this.lives,
+    youAre: forPlayer,
+    yourCards: this.getPlayers()[forPlayer].getCards().length,
+    teamPiles: function(){
+      var cards = []
+      for (var suit in this.getTeamPiles())
+        cards.push(this.getTeamPiles()[suit])
+      return cards
+    }.bind(this)(),
+    discards: this.discardPile,
+    gameIsOver: this.isOver,
+    whoseTurn: this.turn
+  }
+
+  toSend.hands[forPlayer] = undefined
+
+  return toSend
+}
+
 module.exports = Game

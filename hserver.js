@@ -4,6 +4,7 @@ var io   = require('socket.io')(app);
 var _    = require('underscore');
 
 var users = require('./users.js')(io);
+var gameServer = require('./gserver.js')(io);
 var chat  = io.of('/chat');
 
 console.log("Chatserver");
@@ -24,4 +25,12 @@ io.on('connection', function(socket) {
     users.connected()[socket.id].name = name;
     users.emit();
   });
+
+  socket.on('startGame', function() {
+    var freeUsers = _.filter(_.values(users.connected()), function(user) {
+      return user.num === undefined;
+    });
+    var gameID = gameServer.createGame(freeUsers);
+    io.emit('gameIsStarting', gameID);
+  })
 });

@@ -6,7 +6,7 @@
     <script src="js/react.js"></script>
     <script src="js/JSXTransformer.js"></script>
     <script src="js/jquery-1.11.1.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="socket.io.js"></script>
   </head>
   <body>
     <div id="content"></div>
@@ -230,17 +230,16 @@
       var WholeGame = React.createClass({
         getInitialState: function() {
 
-          socket = io(":3001")
+          var gameID = location.search.split('=')[1];
+
+          socket = io(":3001/" + gameID);
 
           socket.on('connect', function() {
+            console.log('got connect message')
             this.setState({text: "Connect"});
           }.bind(this))
 
-          socket.on('youAre', function(numString) {
-            yourPlayerNum = parseInt(numString)
-          })
-
-          socket.on('gameInit', this.gameInit)
+          socket.on('gameState', this.gameState)
 
           socket.on('erra', this.showError)
 
@@ -257,8 +256,9 @@
           this.setState(state)
         },
 
-        gameInit: function(game) {
+        gameState: function(game) {
           console.log('game: ' + game)
+          yourPlayerNum = game.youAre
           state = game
           turnMessage = (state.whoseTurn === yourPlayerNum) ? "Your turn" : "Player " + state.whoseTurn + "'s turn"
           turnMessage = "\n" + turnMessage

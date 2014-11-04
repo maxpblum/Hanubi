@@ -2,7 +2,8 @@ var _    = require('underscore');
 
 var UserHandler = function(io) {
   
-  users = {};
+  var users = {};
+
   this.connected = function() {
     return users;
   };
@@ -35,14 +36,17 @@ var UserHandler = function(io) {
         if(value[0] === 'io') {
           if(users[value[1]]) {
             users[socket.id] = users[value[1]];
+            users[socket.id].emit = socket.emit.bind(socket);
             delete users[value[1]];
             return connect(socket.id);
           }
         }
       }
     }
+    
     users[socket.id] = {created: Date.now(),
-                        name: "Anonymous"}
+                        name: "Anonymous",
+                        emit: socket.emit.bind(socket)};
 
     socket.on('disconnect', function() {
       var id   = socket.id;
