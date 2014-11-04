@@ -8,37 +8,34 @@ var GamesHandler = function(io) {
   this.createGame = function(players) {
 
     function emitState() {
-      players.forEach(function(player){
-        console.log('updating ' + player.name);
-        console.log('whose socket ID is ' + player.socket.id);
-        player.emit('gameState', state.stringify(player.num));
-      })
+      for(var i=0; i< sockets.length; i++) {
+        sockets[i].emit('gameState', state.stringify(i));
+
+      }
     }
 
-    for (var p = 0; p < players.length; p++) {
-      players[p] && (players[p].num = p);
-    }
 
     var state = new Game(players.length);
-
     var gameID = gameCounter++;
+
+    var nextNum = 0;
+    var sockets = [];
 
     var nsp = io.of('/' + gameID);
 
     nsp.on('connection', function(socket) {
+      var playerNum = nextNum++;
+      sockets.push(socket);
 
       console.log('Player connected to namespace with socket ID ' + socket.id)
-
-      setTimeout(emitState, 3000);
-
-      socket.emit('gameState', state.stringify(0));
+      socket.emit('gameState', state.stringify(playerNum));
 
       socket.on('clue', function(clue){
         clue = JSON.parse(clue)
         try {
           var matching = state.giveClue(clue.giver, 
             clue.recipient, clue.suitOrNumber)
-          updatePlayers()
+          emitState()
         }
         catch(err) {
           console.log(err.message)
@@ -50,7 +47,7 @@ var GamesHandler = function(io) {
         play = JSON.parse(play)
         try {
           state.playCard(play.player, play.cardIndex)
-          updatePlayers()
+          emitState()
         }
         catch(err) {
           console.log(err.message)
@@ -61,7 +58,7 @@ var GamesHandler = function(io) {
         discard = JSON.parse(discard)
         try {
           state.discard(discard.player, discard.cardIndex)
-          updatePlayers()
+          emitState()
         }
         catch(err) {
           console.log(err.message)
