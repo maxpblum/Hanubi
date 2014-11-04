@@ -10,6 +10,7 @@ var GamesHandler = function(io) {
     function emitState() {
       players.forEach(function(player){
         console.log('updating ' + player.name);
+        console.log('whose socket ID is ' + player.socket.id);
         player.emit('gameState', state.stringify(player.num));
       })
     }
@@ -18,7 +19,7 @@ var GamesHandler = function(io) {
       players[p] && (players[p].num = p);
     }
 
-    var state = new Game(_.keys(players).length);
+    var state = new Game(players.length);
 
     var gameID = gameCounter++;
 
@@ -30,7 +31,7 @@ var GamesHandler = function(io) {
 
       setTimeout(emitState, 3000);
 
-      socket.emit('connect', 'HI!');
+      socket.emit('gameState', state.stringify(0));
 
       socket.on('clue', function(clue){
         clue = JSON.parse(clue)

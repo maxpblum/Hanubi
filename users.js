@@ -25,28 +25,37 @@ var UserHandler = function(io) {
   }.bind(this);
 
   io.on('connection', function(socket) {
+    var user;
     if(users[socket.id]) {
-      return connect(socket.id);
+      console.log('found the same socket id: ' + socket.id)
+      user      = connect(socket.id);
+      user.emit = socket.emit.bind(socket);
     }
+
     var cookie = socket.handshake.headers.cookie;
-    if(cookie) {
+    if(!user && cookie) {
       var values = cookie.split(";").map(function(value) { return value.trim().split("="); });
       for(var i=0; i<values.length; i++) {
         var value = values[i];
         if(value[0] === 'io') {
           if(users[value[1]]) {
+            console.log('updating socket for ' + users[value[1]].name);
             users[socket.id] = users[value[1]];
+            users[socket.id].socket = socket;
             users[socket.id].emit = socket.emit.bind(socket);
             delete users[value[1]];
-            return connect(socket.id);
+            user = users[socket.id];
           }
         }
       }
+    } 
+
+    if(!user) {
+      users[socket.id] = {created: Date.now(),
+                          name: "Anonymous",
+                          emit: socket.emit.bind(socket)};
+      console.log('made new user with id ' + socket.id);  
     }
-    
-    users[socket.id] = {created: Date.now(),
-                        name: "Anonymous",
-                        emit: socket.emit.bind(socket)};
 
     socket.on('disconnect', function() {
       var id   = socket.id;
@@ -63,7 +72,7 @@ var UserHandler = function(io) {
     }.bind(this));
 
 
-    return connect(socket.id)
+    connect(socket.id)
 
   }.bind(this));
 
