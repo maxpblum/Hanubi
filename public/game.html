@@ -148,7 +148,7 @@
 
           return(
             <div className="myHand">
-              My Hand:
+              {this.props.name}:
               {cards}
             </div>
           )
@@ -168,7 +168,7 @@
         render: function() {
           return(
             <div className="otherHand">
-              Someone else's hand:
+              {this.props.name}:
               {this.renderCards()}
             </div>
           )
@@ -186,7 +186,7 @@
           var hands = []
           for (var h = 0; h < listOfHands.length; h++) {
             if (listOfHands[h])
-              hands.push(<OtherHand cards={listOfHands[h]} playerNum={h}/>)
+              hands.push(<OtherHand cards={listOfHands[h]} playerNum={h} name={this.props.names[h]}/>)
           }
           return hands
         },
@@ -202,10 +202,11 @@
 
       var AllPlayers = React.createClass({
         render: function() {
+          var yourName = this.props.names.splice(yourPlayerNum, 1);
           return(
             <div className="allPlayers">
-              <OtherPlayers hands={this.props.hands}/>
-              <MyHand yourCards={this.props.yourCards}/>
+              <OtherPlayers hands={this.props.hands} names={this.props.names}/>
+              <MyHand yourCards={this.props.yourCards} name={yourName}/>
             </div>
           )
         }
@@ -243,12 +244,15 @@
 
           socket.on('gameState', this.gameState)
 
+          socket.on('players', this.names)
+
           socket.on('erra', this.showError)
 
           state = {hands: [[0]],
                   teamPiles: [],
                   discards: [],
-                  yourPlayerNum: 0}
+                  yourPlayerNum: 0,
+                  names: ['No Name']}
 
           return state
         },
@@ -256,6 +260,14 @@
         showError: function(message) {
           gameText += "\n" + message
           this.setState(state)
+        },
+
+        names: function(names) {
+          var playerNames = [];
+          names.forEach(function(nameObj) {
+            playerNames[nameObj.id] = nameObj.name;
+          });
+          this.setState({names: playerNames});
         },
 
         gameState: function(game) {
@@ -274,7 +286,7 @@
               <div className="wholegame">
                 <TeamPiles cards={this.state.teamPiles}/>
                 <Discards cards={this.state.discards}/>
-                <AllPlayers count={this.state.playerCount} hands={this.state.hands} yourCards={this.state.yourCards}/>
+                <AllPlayers count={this.state.playerCount} hands={this.state.hands} yourCards={this.state.yourCards} names={this.state.names}/>
                 <CluesLivesDeck deckLength={this.state.deckLength} clues={this.state.clues} lives={this.state.lives}/>
                 <GameText text={gameText}/>
               </div>
