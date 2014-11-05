@@ -28,12 +28,18 @@ var GamesHandler = function(io) {
           clue = JSON.parse(clue)
           try {
             var matching = state.giveClue(clue.giver, 
-              clue.recipient, clue.suitOrNumber)
-            group.updateUsers()
+              clue.recipient, clue.suitOrNumber);
+            group.emitClue({
+              giver: clue.giver,
+              recipient: clue.recipient,
+              suitOrNumber: clue.suitOrNumber,
+              matching: matching
+            });
+            group.updateUsers();
           }
           catch(err) {
-            console.log(err.message)
-            player.emit('erra', err.message)
+            console.log(err.message);
+            player.emit('erra', err.message);
           }
         };
       },
@@ -79,6 +85,11 @@ var GamesHandler = function(io) {
             console.log('emitting state to ' + player.name);
             player.emit('gameState', state.stringify(player.num));
           });
+        };
+      },
+      emitClue: function(group) {
+        return function(groupClue) {
+          group.sendAll('clue', JSON.stringify(groupClue));
         };
       },
       updateUsers: function(group) {
