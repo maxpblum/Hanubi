@@ -202,10 +202,11 @@
 
       var AllPlayers = React.createClass({
         render: function() {
-          var yourName = this.props.names.splice(yourPlayerNum, 1);
+          var names = this.props.names.slice();
+          var yourName = names.splice(yourPlayerNum, 1)[0];
           return(
             <div className="allPlayers">
-              <OtherPlayers hands={this.props.hands} names={this.props.names}/>
+              <OtherPlayers hands={this.props.hands} names={names}/>
               <MyHand yourCards={this.props.yourCards} name={yourName}/>
             </div>
           )
@@ -244,7 +245,7 @@
 
           socket.on('gameState', this.gameState)
 
-          socket.on('players', this.names)
+          socket.on('players', this.setNames)
 
           socket.on('erra', this.showError)
 
@@ -262,7 +263,8 @@
           this.setState(state)
         },
 
-        names: function(names) {
+        setNames: function(names) {
+          console.log(names)
           var playerNames = [];
           names.forEach(function(nameObj) {
             playerNames[nameObj.id] = nameObj.name;

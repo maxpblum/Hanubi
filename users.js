@@ -12,7 +12,8 @@ var UserHandler = function(io) {
       sendAll: nsp.emit.bind(nsp),
       emitNames: function() {
         var userNames = this.users.map(function(user, index) {
-          return {id: user.num ? user.num : index, name: user.name};
+          return {id: user.num, 
+                  name: user.name};
         });
         this.sendAll('players', userNames);
         console.log("Emitted " + userNames.length + " player name(s) to namespace " + name);
