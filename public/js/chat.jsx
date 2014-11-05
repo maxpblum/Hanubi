@@ -10,12 +10,10 @@ var app = app || {};
 
 (function () {
   'use strict';
-  console.log("ASD");
 
   app.Chat = React.createClass({
-    chat: io(":3001/chat"),
     getInitialState: function() {
-      this.chat.on('chat', function(message) {
+      this.props.socket.on('chat', function(message) {
         var messages = this.state.messages;
         messages.push(message);
         this.setState({messages: messages});
@@ -32,7 +30,7 @@ var app = app || {};
     emitMessage: function(e) {
       e.preventDefault();
       var message = this.state.message;
-      this.chat.emit('chat', message); 
+      this.props.socket.emit('chat', message); 
       this.setState({message: ''});
     },
     onChange: function(e) {
