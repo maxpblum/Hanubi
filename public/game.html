@@ -269,8 +269,10 @@
             <div id="game">
               <div id="cards">
                 <table>
+                  <tr><td colSpan="2" className="header">Piles</td></tr>
                   <TeamPiles cards={this.state.teamPiles}/>
                   <Discards cards={this.state.discards}/>
+                  <tr><td colSpan="2" className="header">Hands</td></tr>
                   <OtherPlayers hands={this.state.hands} names={names}/>
                   <MyHand yourCards={this.state.yourCards} name={yourName}/>
                 </table>

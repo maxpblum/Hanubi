@@ -192,3 +192,8 @@ table td.cards {
   width: 55%;
   text-align: right;
 }
+table td.header {
+  font-size: 1.2em;
+  text-align: center;
+  height: auto;
+}
