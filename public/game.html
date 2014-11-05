@@ -118,10 +118,10 @@
         },
         render: function() {
           return(
-            <div className="teamPiles">
-              Team Piles:
-              {this.props.cards.map(this.renderCard)}
-            </div>
+            <tr>
+              <td className="text">Team Piles:</td>
+              <td className="cards">{this.props.cards.map(this.renderCard)}</td>
+            </tr>
           )
         }
       })
@@ -132,10 +132,10 @@
         },
         render: function() {
           return(
-            <div className="discards">
-              Discards:
-              {this.props.cards.map(this.renderCard)}
-            </div>
+            <tr>
+              <td className="text">Discards:</td>
+              <td className="cards">{this.props.cards.map(this.renderCard)}</td>
+            </tr>
           )
         }       
       })
@@ -147,10 +147,10 @@
             cards.push(<InvisCard key={c}/>)
 
           return(
-            <div className="myHand">
-              My Hand:
-              {cards}
-            </div>
+            <tr>
+              <td className="text">My Hand:</td>
+              <td className="cards">{cards}</td>
+            </tr>
           )
         }
       })
@@ -167,10 +167,10 @@
 
         render: function() {
           return(
-            <div className="otherHand">
-              Someone else's hand:
-              {this.renderCards()}
-            </div>
+            <tr>
+              <td className="text">Someone else's hand:</td>
+              <td className="cards">{this.renderCards()}</td>
+            </tr>
           )
         }
       })
@@ -192,22 +192,7 @@
         },
 
         render: function() {
-          return(
-            <div className="otherPlayers">
-              {this.makeHands(this.props.hands)}
-            </div>
-          )
-        }
-      })
-
-      var AllPlayers = React.createClass({
-        render: function() {
-          return(
-            <div className="allPlayers">
-              <OtherPlayers hands={this.props.hands}/>
-              <MyHand yourCards={this.props.yourCards}/>
-            </div>
-          )
+          return <div>{this.makeHands(this.props.hands)}</div>
         }
       })
 
@@ -272,9 +257,12 @@
           return(
             <div id="game">
               <div id="cards">
-                <TeamPiles cards={this.state.teamPiles}/>
-                <Discards cards={this.state.discards}/>
-                <AllPlayers count={this.state.playerCount} hands={this.state.hands} yourCards={this.state.yourCards}/>
+                <table>
+                  <TeamPiles cards={this.state.teamPiles}/>
+                  <Discards cards={this.state.discards}/>
+                  <OtherPlayers hands={this.state.hands}/>
+                  <MyHand yourCards={this.state.yourCards}/>
+                </table>
                 <CluesLivesDeck deckLength={this.state.deckLength} clues={this.state.clues} lives={this.state.lives}/>
                 <GameText text={gameText}/>
               </div>

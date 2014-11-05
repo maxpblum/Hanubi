@@ -26,7 +26,8 @@
   font-size: 40px;
   margin: 3px;
   padding: 3px;
-  background-color: white;
+  background-color: #11083f;
+  border-radius: 6px;
 }
 
 .blueCard:hover, .greenCard:hover, .yellowCard:hover, .redCard:hover, 
@@ -34,6 +35,9 @@
   background-color: black;
 }
 
+.invisCard {
+  color: grey;
+}
 .invisCard:hover {
   color: white;
 }
@@ -59,8 +63,8 @@
 }
 
 .whiteCard {
-  border-color: gray;
-  color: gray;
+  border-color: white;
+  color: white;
 }
 
 .yellowCard {
@@ -173,4 +177,18 @@ div#start .button {
 dialog > button {
   padding:      20px;
   font-size:    1.5em;
+}
+
+table tr {
+  height: 70px;
+}
+table td.text {
+  width: 40%;
+}
+table td.cards {
+  width: 60%;
+  text-align: right;
+}
+
+.cardContainer button {
 }
