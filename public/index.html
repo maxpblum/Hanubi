@@ -19,7 +19,7 @@
         socket.emit("startGame");
       };
 
-      var socket = io(":3001");
+      var socket = io(":3001/chat");
 
       var Status = React.createClass({
         render: function() {

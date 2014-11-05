@@ -101,7 +101,7 @@
 
         render: function() {
           return (
-            <button className="invisCard" onClick={function(){ this.showDialog(3) }.bind(this)}>?</button>
+            <button className="invisCard" onClick={function(){ this.showDialog(this.props.key) }.bind(this)}>?</button>
           )
         }
       })
@@ -138,7 +138,7 @@
         render: function() {
           var cards = []
           for (var c = 0; c < this.props.yourCards; c++)
-            cards.push(<InvisCard />)
+            cards.push(<InvisCard key={c}/>)
 
           return(
             <div className="myHand">
