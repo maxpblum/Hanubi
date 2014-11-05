@@ -183,6 +183,8 @@
 
       var OtherPlayers = React.createClass({
         makeHands: function(listOfHands) {
+          console.log(listOfHands)
+          console.log(this.props.names)
           var hands = []
           for (var h = 0; h < listOfHands.length; h++) {
             if (listOfHands[h])
@@ -202,8 +204,10 @@
 
       var AllPlayers = React.createClass({
         render: function() {
+          console.log(this.props.names);
           var names = this.props.names.slice();
-          var yourName = names.splice(yourPlayerNum, 1)[0];
+          var yourName = names.splice(yourPlayerNum, 1, undefined)[0];
+          console.log(names);
           return(
             <div className="allPlayers">
               <OtherPlayers hands={this.props.hands} names={names}/>
