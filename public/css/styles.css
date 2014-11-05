@@ -163,3 +163,14 @@ div#start .button {
   color: lightgrey;
   cursor: auto;
 }
+.dialog {
+ position:            absolute;
+ top:                 250px;
+ padding:             50px;
+ border-radius:       15px;
+ background-color:    #11083f;
+}
+dialog > button {
+  padding:      20px;
+  font-size:    1.5em;
+}
