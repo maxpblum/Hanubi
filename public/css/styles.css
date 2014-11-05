@@ -82,27 +82,35 @@ div#main {
   border: 5px solid #7853a3;
   position: relative;
 }
-div#players {
+div#players, div#cards, div#chat {
   background-color: rgba(10, 10, 10, 0.8);
-  width: 395px;
-  height: 400px;
   padding: 20px;
   border-radius: 15px;
 
+  width: 395px;
+  height: 400px;
+
   position: absolute;
+}
+div#players {
   left: 10px;
   top: 250px;
 }
-div#chat {
-  background-color: rgba(10, 10, 10, 0.8);
-  width: 395px;
-  height: 400px;
-  padding: 20px;
-  border-radius: 15px;
+div#cards {
+  height: 640px;
 
-  position: absolute;
+  left: 10px;
+  top:   10px;
+}
+div#chat {
   right: 10px;
   top: 250px;
+}
+div#game > div#chat {
+  height: 640px;
+
+  right: 10px;
+  top:   10px;
 }
 div#chat dl {
   width: 100%;

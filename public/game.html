@@ -282,8 +282,8 @@
 
         render: function() {
           return(
-            <div>
-              <div className="wholegame">
+            <div id="game">
+              <div id="cards">
                 <TeamPiles cards={this.state.teamPiles}/>
                 <Discards cards={this.state.discards}/>
                 <AllPlayers count={this.state.playerCount} hands={this.state.hands} yourCards={this.state.yourCards} names={this.state.names}/>
