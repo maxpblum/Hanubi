@@ -179,6 +179,9 @@ dialog > button {
   font-size:    1.5em;
 }
 
+table {
+  width: 100%;
+}
 table tr {
   height: 70px;
 }
@@ -186,9 +189,6 @@ table td.text {
   width: 40%;
 }
 table td.cards {
-  width: 60%;
+  width: 55%;
   text-align: right;
-}
-
-.cardContainer button {
 }

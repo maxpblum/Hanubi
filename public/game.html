@@ -148,7 +148,7 @@
 
           return(
             <tr>
-              <td className="text">My Hand:</td>
+              <td className="text">{this.props.name}</td>
               <td className="cards">{cards}</td>
             </tr>
           )
@@ -168,7 +168,7 @@
         render: function() {
           return(
             <tr>
-              <td className="text">Someone else's hand:</td>
+              <td className="text">{this.props.name}</td>
               <td className="cards">{this.renderCards()}</td>
             </tr>
           )
@@ -186,7 +186,7 @@
           var hands = []
           for (var h = 0; h < listOfHands.length; h++) {
             if (listOfHands[h])
-              hands.push(<OtherHand cards={listOfHands[h]} playerNum={h}/>)
+              hands.push(<OtherHand cards={listOfHands[h]} playerNum={h} name={this.props.names[h]}/>)
           }
           return hands
         },
@@ -222,18 +222,20 @@
         getInitialState: function() {
 
           socket.on('connect', function() {
-            console.log('got connect message')
             this.setState({text: "Connect"});
           }.bind(this))
 
           socket.on('gameState', this.gameState)
+
+          socket.on('players', this.setNames)
 
           socket.on('erra', this.showError)
 
           state = {hands: [[0]],
                   teamPiles: [],
                   discards: [],
-                  yourPlayerNum: 0}
+                  yourPlayerNum: 0,
+                  names: ['No Name']}
 
           return state
         },
@@ -243,8 +245,15 @@
           this.setState(state)
         },
 
+        setNames: function(names) {
+          var playerNames = [];
+          names.forEach(function(nameObj) {
+            playerNames[nameObj.id] = nameObj.name;
+          });
+          this.setState({names: playerNames});
+        },
+
         gameState: function(game) {
-          console.log('game: ' + game)
           yourPlayerNum = game.youAre
           state = game
           turnMessage = (state.whoseTurn === yourPlayerNum) ? "Your turn" : "Player " + state.whoseTurn + "'s turn"
@@ -254,14 +263,16 @@
         },
 
         render: function() {
+          var names = this.state.names.slice();
+          var yourName = names.splice(yourPlayerNum, 1, undefined)[0];
           return(
             <div id="game">
               <div id="cards">
                 <table>
                   <TeamPiles cards={this.state.teamPiles}/>
                   <Discards cards={this.state.discards}/>
-                  <OtherPlayers hands={this.state.hands}/>
-                  <MyHand yourCards={this.state.yourCards}/>
+                  <OtherPlayers hands={this.state.hands} names={names}/>
+                  <MyHand yourCards={this.state.yourCards} name={yourName}/>
                 </table>
                 <CluesLivesDeck deckLength={this.state.deckLength} clues={this.state.clues} lives={this.state.lives}/>
                 <GameText text={gameText}/>
