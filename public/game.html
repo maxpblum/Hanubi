@@ -117,10 +117,22 @@
           return <VisCard suit={card.suit} number={card.number}/>
         },
         render: function() {
+          var dummies = [{number: "0", suit: "blue"},
+                         {number: "0", suit: "red"},
+                         {number: "0", suit: "green"},
+                         {number: "0", suit: "white"},
+                         {number: "0", suit: "yellow"}];
+          this.props.cards.forEach(function(card) {
+            dummies.forEach(function(dummy) {
+              if(dummy.suit == card.suit) {
+                dummy.number = card.number;
+              }
+            })
+          });
           return(
             <tr>
               <td className="text">Team Piles:</td>
-              <td className="cards">{this.props.cards.map(this.renderCard)}</td>
+              <td className="cards">{dummies.map(this.renderCard)}</td>
             </tr>
           )
         }
