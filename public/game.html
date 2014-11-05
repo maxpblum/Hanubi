@@ -9,12 +9,18 @@
     <script src="socket.io.js"></script>
   </head>
   <body>
-    <div id="content"></div>
+    <div id="main"></div>
+    <script type="text/jsx" src="js/chat.jsx"></script>
     <script type="text/jsx">
       /** @jsx React.DOM */
       // The above declaration must remain intact at the top of the script.
 
-      var socket
+      var app = app || {};
+      var Chat = app.Chat;
+
+      var gameID = location.search.split('=')[1];
+      var socket = io(":3001/" + gameID);
+
       var state
       var gameText = "No connection yet?"
       var yourPlayerNum = 0
@@ -230,10 +236,6 @@
       var WholeGame = React.createClass({
         getInitialState: function() {
 
-          var gameID = location.search.split('=')[1];
-
-          socket = io(":3001/" + gameID);
-
           socket.on('connect', function() {
             console.log('got connect message')
             this.setState({text: "Connect"});
@@ -268,12 +270,15 @@
 
         render: function() {
           return(
-            <div className="wholegame">
-              <TeamPiles cards={this.state.teamPiles}/>
-              <Discards cards={this.state.discards}/>
-              <AllPlayers count={this.state.playerCount} hands={this.state.hands} yourCards={this.state.yourCards}/>
-              <CluesLivesDeck deckLength={this.state.deckLength} clues={this.state.clues} lives={this.state.lives}/>
-              <GameText text={gameText}/>
+            <div>
+              <div className="wholegame">
+                <TeamPiles cards={this.state.teamPiles}/>
+                <Discards cards={this.state.discards}/>
+                <AllPlayers count={this.state.playerCount} hands={this.state.hands} yourCards={this.state.yourCards}/>
+                <CluesLivesDeck deckLength={this.state.deckLength} clues={this.state.clues} lives={this.state.lives}/>
+                <GameText text={gameText}/>
+              </div>
+              <Chat socket={socket} />
             </div>
           )
         }
@@ -281,7 +286,7 @@
 
       React.renderComponent(
         <WholeGame />,
-        document.getElementById('content')
+        document.getElementById('main')
       )
 
 
