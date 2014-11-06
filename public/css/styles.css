@@ -151,6 +151,7 @@ div#chat dl {
 }
 .overflow-wrapper {
   overflow: scroll;
+  height: 95%;
 }
 form {
   position: absolute;
