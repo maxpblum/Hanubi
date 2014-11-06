@@ -89,13 +89,15 @@ Game.prototype.discard = function(playerIndex, cardIndex) {
   if (this.clues === this.MAX_CLUES)
     throw new Error ('Can\'t discard while on maximum clueness level.')
 
-  this.discardPile.push(this.players[playerIndex].takeCard(cardIndex))
+  var discarded = this.players[playerIndex].takeCard(cardIndex);
+  this.discardPile.push(discarded);
   
   this.players[playerIndex].addCard(this.deck.takeCard())
 
   this.clues++
 
   this.afterMove()
+  return discarded;
 }
 
 Game.prototype.logMove = function(playerIndex, cardIndex) {
@@ -123,8 +125,8 @@ Game.prototype.playCard = function(playerIndex, cardIndex) {
   if (playedCard.value === 5 && this.clues < this.MAX_CLUES)
     this.clues++
 
-  this.afterMove() 
-  return moveWasValid
+  this.afterMove();
+  return {card: playedCard, valid: moveWasValid};
 }
 
 Game.prototype.giveClue = function(playerIndex, clueRecipientIndex, suitOrValue) {

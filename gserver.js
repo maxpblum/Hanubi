@@ -48,8 +48,14 @@ var GamesHandler = function(io) {
           console.log("PLAYING CARD");
           play = JSON.parse(play)
           try {
-            state.playCard(play.player, play.cardIndex)
-            group.updateUsers()
+            var result = state.playCard(play.player, play.cardIndex);
+            group.emitMove({
+              player: player.num,
+              card: result.card,
+              cardIndex: play.cardIndex,
+              action: result.valid ? 'played a card' : 'tried to play an invalid card'
+            })
+            group.updateUsers();
           }
           catch(err) {
             console.log(err.message)
@@ -61,8 +67,14 @@ var GamesHandler = function(io) {
         return function(discard) {
           discard = JSON.parse(discard)
           try {
-            state.discard(discard.player, discard.cardIndex)
-            group.updateUsers()
+            var discarded = state.discard(discard.player, discard.cardIndex);
+            group.emitMove({
+              player: player.num,
+              card: discarded,
+              cardIndex: discard.cardIndex,
+              action: 'discarded a card'
+            });
+            group.updateUsers();
           }
           catch(err) {
             console.log(err.message)
@@ -92,6 +104,11 @@ var GamesHandler = function(io) {
           group.sendAll('clue', JSON.stringify(groupClue));
         };
       },
+      emitMove: function(group) {
+        return function(groupMove) {
+          group.sendAll('move', JSON.stringify(groupMove));
+        };
+      }
       updateUsers: function(group) {
         return function() {
           console.log('in the new, game-written updateUsers method')
