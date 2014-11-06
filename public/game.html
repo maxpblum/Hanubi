@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>JSHanabi</title>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="css/styles.css">
     <script src="js/react.js"></script>
     <script src="js/JSXTransformer.js"></script>
@@ -135,6 +136,9 @@
           var deckLength = this.props.deckLength;
           var lastValue  = deckLength < 10 ? deckLength : "?";
           var deckCards  = [1, 2, lastValue].slice(0, deckLength);
+          var lives = this.props.lives;
+          var clues = this.props.clues;
+          var score = this.props.score;
 
           var renderDeckCard = function(val) {
             return <button className="invisCard">{val}</button>
@@ -143,7 +147,12 @@
                     <div className="cardContainer deckPile">
                       {deckCards.map(renderDeckCard)}
                     </div>
-                   {dummies.map(this.renderCard)}
+                    {dummies.map(this.renderCard)}
+                    <div className="stats">
+                      <span>{lives}<i className="fa fa-heart"></i></span><br/>
+                      <span>{clues}<i className="fa fa-comment"></i></span><br/>
+                      <span>{score}<i className="fa fa-star"></i></span><br/>
+                    </div>
                  </div>)
         }
       })
@@ -216,17 +225,6 @@
         }
       })
 
-      var CluesLivesDeck = React.createClass({
-        render: function() {
-          return(
-            <div className="cluesLivesDeck">
-              <div>Clues: {this.props.clues}</div>
-              <div>Lives: {this.props.lives}</div>
-            </div>
-          )
-        }
-      })
-
       var WholeGame = React.createClass({
         getInitialState: function() {
 
@@ -273,6 +271,9 @@
         gameState: function(game) {
           yourPlayerNum = game.youAre
           state = game
+          if (game.isOver) {
+            this.refs.chat.flushMessage({name:'Hanubi', text:'The game is over! Your final score is ' + game.score});
+          }
           this.setState(state)
         },
 
@@ -282,10 +283,9 @@
           return(
             <div id="game">
               <div id="cards">
-                <TeamPiles cards={this.state.teamPiles} deckLength={this.state.deckLength}/>
+                <TeamPiles cards={this.state.teamPiles} deckLength={this.state.deckLength} lives={this.state.lives} clues={this.state.clues} score={this.state.score}/>
                 <Discards cards={this.state.discards}/>
                 <Players hands={this.state.hands} names={this.state.names} yourCards={this.state.yourCards} whoseTurn={this.state.whoseTurn}/>
-                <CluesLivesDeck deckLength={this.state.deckLength} clues={this.state.clues} lives={this.state.lives}/>
               </div>
               <Chat socket={socket} ref="chat" />
             </div>
