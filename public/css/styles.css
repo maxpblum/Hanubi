@@ -20,7 +20,7 @@
   padding: 3px;
 }
 
-.clueCard, .blueCard, .greenCard, .yellowCard, .redCard, .whiteCard, .rainbowCard, .invisCard {
+.moveCard, .clueCard, .blueCard, .greenCard, .yellowCard, .redCard, .whiteCard, .rainbowCard, .invisCard {
   display: inline;
   border: 3px solid;
   font-size: 40px;
@@ -30,7 +30,7 @@
   border-radius: 6px;
 }
 
-.clueCard {
+.moveCard, .clueCard {
   padding 1px;
   font-size: 1.2em;
 }

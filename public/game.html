@@ -240,6 +240,11 @@
             clue.recipient = this.state.names[clue.recipient];
             this.refs.chat.showClue(clue);
           }.bind(this));
+          socket.on('move', function(move) {
+            move = JSON.parse(move)
+            move.player = this.state.names[move.player];
+            this.refs.chat.showMove(move);
+          }.bind(this));
 
           state = {hands: [[0]],
                   teamPiles: [],

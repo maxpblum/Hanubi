@@ -108,7 +108,7 @@ var GamesHandler = function(io) {
         return function(groupMove) {
           group.sendAll('move', JSON.stringify(groupMove));
         };
-      }
+      },
       updateUsers: function(group) {
         return function() {
           console.log('in the new, game-written updateUsers method')
