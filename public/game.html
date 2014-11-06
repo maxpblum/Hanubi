@@ -23,7 +23,6 @@
       var socket = io(":3001/" + gameID);
 
       var state
-      var gameText = "No connection yet?"
       var yourPlayerNum = 0
 
       var VisCard = React.createClass({
@@ -214,16 +213,6 @@
         }
       })
 
-      var GameText = React.createClass({
-        render: function() {
-          return(
-            <div className="gameText">
-              {gameText}
-            </div>
-          )
-        }
-      })
-
       var WholeGame = React.createClass({
         getInitialState: function() {
 
@@ -256,8 +245,7 @@
         },
 
         showError: function(message) {
-          gameText += "\n" + message
-          this.setState(state)
+          this.refs.chat.flushMessage({name: 'Hanubi', text: message});
         },
 
         setNames: function(names) {
@@ -271,9 +259,6 @@
         gameState: function(game) {
           yourPlayerNum = game.youAre
           state = game
-          turnMessage = (state.whoseTurn === yourPlayerNum) ? "Your turn" : "Player " + state.whoseTurn + "'s turn"
-          turnMessage = "\n" + turnMessage
-          gameText += turnMessage
           this.setState(state)
         },
 
@@ -290,7 +275,6 @@
                   <MyHand yourCards={this.state.yourCards} name={yourName}/>
                 </table>
                 <CluesLivesDeck deckLength={this.state.deckLength} clues={this.state.clues} lives={this.state.lives}/>
-                <GameText text={gameText}/>
               </div>
               <Chat socket={socket} ref="chat" />
             </div>
