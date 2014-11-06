@@ -49,6 +49,7 @@ Game.prototype.initState = function() {
   this.endCountdown = this.players.length
   this.turn         = Math.floor(Math.random() * this.players.length)
   this.isOver       = false
+  this.score        = 0
 }
 
 Game.prototype.checkGameOver = function() {
@@ -117,6 +118,8 @@ Game.prototype.playCard = function(playerIndex, cardIndex) {
     this.lives--
     if (this.lives === 0)
       this.isOver = true
+  } else {
+    this.score++
   }
 
   this.players[playerIndex].addCard(this.deck.takeCard())
@@ -182,7 +185,8 @@ Game.prototype.stringify = function (forPlayer) {
     }.bind(this)(),
     discards: this.discardPile,
     gameIsOver: this.isOver,
-    whoseTurn: this.turn
+    whoseTurn: this.isOver ? -1 : this.turn, 
+    score: this.score
   }
 
   toSend.hands[forPlayer] = undefined
