@@ -6,6 +6,7 @@
     <script src="js/react.js"></script>
     <script src="js/JSXTransformer.js"></script>
     <script src="js/jquery-1.11.1.js"></script>
+    <script src="http://underscorejs.org/underscore-min.js"></script>
     <script src="socket.io.js"></script>
   </head>
   <body>
@@ -240,10 +241,14 @@
           }.bind(this))
 
           socket.on('gameState', this.gameState)
-
           socket.on('players', this.setNames)
-
           socket.on('erra', this.showError)
+          socket.on('clue', function(clue) {
+            clue = JSON.parse(clue);
+            clue.giver = this.state.names[clue.giver];
+            clue.recipient = this.state.names[clue.recipient];
+            this.refs.chat.showClue(clue);
+          }.bind(this));
 
           state = {hands: [[0]],
                   teamPiles: [],
@@ -293,7 +298,7 @@
                 <CluesLivesDeck deckLength={this.state.deckLength} clues={this.state.clues} lives={this.state.lives}/>
                 <GameText text={gameText}/>
               </div>
-              <Chat socket={socket} />
+              <Chat socket={socket} ref="chat" />
             </div>
           )
         }

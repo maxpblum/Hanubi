@@ -20,7 +20,7 @@
   padding: 3px;
 }
 
-.blueCard, .greenCard, .yellowCard, .redCard, .whiteCard, .rainbowCard, .invisCard {
+.clueCard, .blueCard, .greenCard, .yellowCard, .redCard, .whiteCard, .rainbowCard, .invisCard {
   display: inline;
   border: 3px solid;
   font-size: 40px;
@@ -30,12 +30,21 @@
   border-radius: 6px;
 }
 
+.clueCard {
+  padding 1px;
+  font-size: 1.2em;
+}
+
+.clueChat {
+  margin: 20px;
+}
+
 .blueCard:hover, .greenCard:hover, .yellowCard:hover, .redCard:hover, 
 .whiteCard:hover, .rainbowCard:hover, .invisCard:hover {
   background-color: black;
 }
 
-.invisCard {
+.invisCard, .unknownCard {
   color: grey;
 }
 .invisCard:hover {
@@ -96,7 +105,7 @@
 }
 .hand button:hover {
   transition: 0.2s ease-in-out;
-  transform: scale(1.5) translateY(-20px);
+  transform: scale(1.5) translateY(-10px);
 }
 
 /* styling for index.html */
