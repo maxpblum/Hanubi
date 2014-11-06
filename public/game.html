@@ -131,7 +131,14 @@
               }
             })
           });
-          return(<div id="team-pile" className="cards">{dummies.map(this.renderCard)}</div>)
+          return(<div id="team-pile" className="cards">
+                    <div className="cardContainer">
+                      <button className="invisCard deckPile">0</button>
+                      <button className="invisCard deckPile">1</button>
+                      <button className="invisCard deckPile">30</button>
+                    </div>
+                   {dummies.map(this.renderCard)}
+                 </div>)
         }
       })
 
