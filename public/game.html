@@ -126,7 +126,7 @@
                          {number: "_", suit: "yellow"}];
           this.props.cards.forEach(function(card) {
             dummies.forEach(function(dummy) {
-              if(dummy.suit == card.suit) {
+              if(dummy.suit === card.suit) {
                 dummy.number = card.number;
               }
             })
@@ -152,7 +152,7 @@
             cards.push(<InvisCard key={c}/>)
 
           return(
-            <tr>
+            <tr className={this.props.active ? 'currentPlayer' : ''}>
               <td className="text">{this.props.name}</td>
               <td className="cards hand">{cards}</td>
             </tr>
@@ -172,7 +172,7 @@
 
         render: function() {
           return(
-            <tr>
+            <tr className={this.props.active ? 'currentPlayer' : ''}>
               <td className="text">{this.props.name}</td>
               <td className="cards hand">{this.renderCards()}</td>
             </tr>
@@ -191,9 +191,9 @@
           var hands = []
           for (var h = 0; h < listOfHands.length; h++) {
             if (listOfHands[h])
-              hands.push(<OtherHand cards={listOfHands[h]} playerNum={h} name={this.props.names[h]}/>);
+              hands.push(<OtherHand active={h === this.props.whoseTurn} cards={listOfHands[h]} playerNum={h} name={this.props.names[h]}/>);
             else
-              hands.push(<MyHand yourCards={this.props.yourCards} name={this.props.names[h]}/>);
+              hands.push(<MyHand active={h === this.props.whoseTurn} yourCards={this.props.yourCards} name={this.props.names[h]}/>);
           }
           return hands
         },
@@ -272,7 +272,7 @@
               <div id="cards">
                 <TeamPiles cards={this.state.teamPiles}/>
                 <Discards cards={this.state.discards}/>
-                <Players hands={this.state.hands} names={this.state.names} yourCards={this.state.yourCards}/>
+                <Players hands={this.state.hands} names={this.state.names} yourCards={this.state.yourCards} whoseTurn={this.state.whoseTurn}/>
                 <CluesLivesDeck deckLength={this.state.deckLength} clues={this.state.clues} lives={this.state.lives}/>
               </div>
               <Chat socket={socket} ref="chat" />
