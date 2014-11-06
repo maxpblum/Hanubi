@@ -235,15 +235,22 @@ dialog > button {
 
 table {
   width: 100%;
+  border: none;
+  border-collapse: collapse;
 }
 table tr {
   height: 70px;
+}
+table tr.currentPlayer td.text {
+  background-color: rgba(120, 83, 163, 0.8);
+  border-radius: 5px;
 }
 table tr.header {
   height: 3em;
 }
 table td.text {
   width: 40%;
+  text-align: center;
 }
 table td.cards {
   width: 55%;
