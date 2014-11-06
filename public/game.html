@@ -131,11 +131,17 @@
               }
             })
           });
+
+          var deckLength = this.props.deckLength;
+          var lastValue  = deckLength < 10 ? deckLength : "?";
+          var deckCards  = [1, 2, lastValue].slice(0, deckLength);
+
+          var renderDeckCard = function(val) {
+            return <button className="invisCard">{val}</button>
+          };
           return(<div id="team-pile" className="cards">
-                    <div className="cardContainer">
-                      <button className="invisCard deckPile">0</button>
-                      <button className="invisCard deckPile">1</button>
-                      <button className="invisCard deckPile">30</button>
+                    <div className="cardContainer deckPile">
+                      {deckCards.map(renderDeckCard)}
                     </div>
                    {dummies.map(this.renderCard)}
                  </div>)
@@ -277,7 +283,7 @@
           return(
             <div id="game">
               <div id="cards">
-                <TeamPiles cards={this.state.teamPiles}/>
+                <TeamPiles cards={this.state.teamPiles} deckLength={this.state.deckLength}/>
                 <Discards cards={this.state.discards}/>
                 <Players hands={this.state.hands} names={this.state.names} yourCards={this.state.yourCards} whoseTurn={this.state.whoseTurn}/>
                 <CluesLivesDeck deckLength={this.state.deckLength} clues={this.state.clues} lives={this.state.lives}/>

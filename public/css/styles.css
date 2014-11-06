@@ -251,6 +251,13 @@ table td.cards {
   width: 55%;
   text-align: right;
 }
+.deckPile {
+  position: absolute;
+  left: 65px;
+}
+.deckPile button {
+  margin-left: -30px;
+}
 div#team-pile {
   width: 100%;
   text-align: center;
