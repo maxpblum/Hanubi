@@ -72,6 +72,33 @@
   color: yellow;
 }
 
+.hand .cardContainer {
+  margin-left: -5px;
+}
+
+.hand :nth-child(1) button {
+  transform: rotate(-10deg)
+}
+.hand :nth-child(2) button {
+  transform: rotate(-5deg);
+}
+.hand :nth-child(3) button {
+  transform: rotate(0deg)
+}
+.hand :nth-child(4) button {
+  transform: rotate(5deg)
+}
+.hand :nth-child(5) button {
+  transform: rotate(10deg)
+}
+.hand button {
+  cursor: pointer;
+}
+.hand button:hover {
+  transition: 0.2s ease-in-out;
+  transform: scale(1.5) translateY(-20px);
+}
+
 /* styling for index.html */
 body {
   color: white;

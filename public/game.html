@@ -107,7 +107,9 @@
 
         render: function() {
           return (
-            <button className="invisCard" onClick={function(){ this.showDialog(this.props.key) }.bind(this)}>?</button>
+            <div className="cardContainer">
+              <button className="invisCard" onClick={function(){ this.showDialog(this.props.key) }.bind(this)}>?</button>
+            </div>
           )
         }
       })
@@ -161,7 +163,7 @@
           return(
             <tr>
               <td className="text">{this.props.name}</td>
-              <td className="cards">{cards}</td>
+              <td className="cards hand">{cards}</td>
             </tr>
           )
         }
@@ -181,7 +183,7 @@
           return(
             <tr>
               <td className="text">{this.props.name}</td>
-              <td className="cards">{this.renderCards()}</td>
+              <td className="cards hand">{this.renderCards()}</td>
             </tr>
           )
         }
