@@ -186,18 +186,20 @@
         return suitName + 'card'
       }
 
-      var OtherPlayers = React.createClass({
+      var Players = React.createClass({
         makeHands: function(listOfHands) {
           var hands = []
           for (var h = 0; h < listOfHands.length; h++) {
             if (listOfHands[h])
-              hands.push(<OtherHand cards={listOfHands[h]} playerNum={h} name={this.props.names[h]}/>)
+              hands.push(<OtherHand cards={listOfHands[h]} playerNum={h} name={this.props.names[h]}/>);
+            else
+              hands.push(<MyHand yourCards={this.props.yourCards} name={this.props.names[h]}/>);
           }
           return hands
         },
 
         render: function() {
-          return <div>{this.makeHands(this.props.hands)}</div>
+          return <table>{this.makeHands(this.props.hands)}</table>
         }
       })
 
@@ -270,10 +272,7 @@
               <div id="cards">
                 <TeamPiles cards={this.state.teamPiles}/>
                 <Discards cards={this.state.discards}/>
-                <table>
-                  <OtherPlayers hands={this.state.hands} names={names}/>
-                  <MyHand yourCards={this.state.yourCards} name={yourName}/>
-                </table>
+                <Players hands={this.state.hands} names={this.state.names} yourCards={this.state.yourCards}/>
                 <CluesLivesDeck deckLength={this.state.deckLength} clues={this.state.clues} lives={this.state.lives}/>
               </div>
               <Chat socket={socket} ref="chat" />
