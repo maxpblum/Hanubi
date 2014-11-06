@@ -81,6 +81,23 @@
   color: yellow;
 }
 
+.discards {
+  height: 70px;
+  text-align: center;
+  width: 100%;
+  margin-left: 20px;
+}
+
+.discards button {
+  margin-left: -20px
+}
+
+.discards button:hover {
+  margin-left: -20px;
+  transition: 0.2s ease-in-out;
+  transform: scale(1.2);
+}
+
 .hand .cardContainer {
   margin-left: -5px;
 }
@@ -222,6 +239,9 @@ table {
 table tr {
   height: 70px;
 }
+table tr.header {
+  height: 3em;
+}
 table td.text {
   width: 40%;
 }
@@ -229,7 +249,16 @@ table td.cards {
   width: 55%;
   text-align: right;
 }
-table td.header {
+div#team-pile {
+  width: 100%;
+  text-align: center;
+  background-color: rgba(120, 83, 163, 0.8);
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-radius: 15px;
+}
+table tr.header td, div.header {
   font-size: 1.2em;
   text-align: center;
   height: auto;

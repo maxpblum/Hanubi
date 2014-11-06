@@ -132,12 +132,7 @@
               }
             })
           });
-          return(
-            <tr>
-              <td className="text">Team Piles:</td>
-              <td className="cards">{dummies.map(this.renderCard)}</td>
-            </tr>
-          )
+          return(<div id="team-pile" className="cards">{dummies.map(this.renderCard)}</div>)
         }
       })
 
@@ -146,11 +141,7 @@
           return <VisCard suit={card.suit} number={card.number}/>
         },
         render: function() {
-          return(
-            <tr>
-              <td className="text">Discards:</td>
-              <td className="cards">{this.props.cards.map(this.renderCard)}</td>
-            </tr>
+          return(<div className="cards discards">{this.props.cards.map(this.renderCard)}</div>
           )
         }       
       })
@@ -287,11 +278,9 @@
           return(
             <div id="game">
               <div id="cards">
+                <TeamPiles cards={this.state.teamPiles}/>
+                <Discards cards={this.state.discards}/>
                 <table>
-                  <tr><td colSpan="2" className="header">Piles</td></tr>
-                  <TeamPiles cards={this.state.teamPiles}/>
-                  <Discards cards={this.state.discards}/>
-                  <tr><td colSpan="2" className="header">Hands</td></tr>
                   <OtherPlayers hands={this.state.hands} names={names}/>
                   <MyHand yourCards={this.state.yourCards} name={yourName}/>
                 </table>
