@@ -27,9 +27,7 @@ var app = app || {};
     },
 
     showClue: function(clue) {
-      console.log("FLUSHING");
       this.flushMessage({type: "clue", clue: clue });
-
     },
 
     emitMessage: function(e) {
@@ -45,8 +43,6 @@ var app = app || {};
     render: function() {
       var show = function(message) {
         if(message.type === 'clue') {
-          console.log("Clue received " + message.clue.suitOrNumber);
-          console.log(message.clue);
           var cards = [];
           for(var i=0; i<5; i++) {
             var value    = message.clue.suitOrNumber;
