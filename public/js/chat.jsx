@@ -48,7 +48,7 @@ var app = app || {};
 
     parseClue: function(message) {
       var cards = [];
-      for(var i=0; i<5; i++) {
+      for(var i=0; i<(this.props.playerCount < 4 ? 5 : 4); i++) {
         var value    = message.clue.suitOrNumber;
         var matching = message.clue.matching;
         
@@ -72,7 +72,7 @@ var app = app || {};
 
     parseMove: function(message) {
       var cards = [];
-      for(var i=0; i<5; i++) {
+      for(var i=0; i<(this.props.playerCount < 4 ? 5 : 4); i++) {
         var suit     = "unknown";
         var number   = "?";
         if(i === message.move.cardIndex) {

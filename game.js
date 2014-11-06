@@ -120,13 +120,14 @@ Game.prototype.playCard = function(playerIndex, cardIndex) {
       this.isOver = true
   } else {
     this.score++
+    if (playedCard.number === 5 && this.clues < this.MAX_CLUES)
+      this.clues++
   }
 
   this.players[playerIndex].addCard(this.deck.takeCard())
 
 
-  if (playedCard.value === 5 && this.clues < this.MAX_CLUES)
-    this.clues++
+
 
   this.afterMove();
   return {card: playedCard, valid: moveWasValid};

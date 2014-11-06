@@ -271,7 +271,7 @@
         gameState: function(game) {
           yourPlayerNum = game.youAre
           state = game
-          if (game.isOver) {
+          if (game.gameIsOver) {
             this.refs.chat.flushMessage({name:'Hanubi', text:'The game is over! Your final score is ' + game.score});
           }
           this.setState(state)
@@ -287,7 +287,7 @@
                 <Discards cards={this.state.discards}/>
                 <Players hands={this.state.hands} names={this.state.names} yourCards={this.state.yourCards} whoseTurn={this.state.whoseTurn}/>
               </div>
-              <Chat socket={socket} ref="chat" />
+              <Chat socket={socket} ref="chat" playerCount={this.state.hands.length}/>
             </div>
           )
         }
