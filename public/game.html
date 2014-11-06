@@ -27,7 +27,7 @@
 
       var VisCard = React.createClass({
         showDialog: function(recipient, suit, number) {
-          if (state.whoseTurn != yourPlayerNum)
+          if (state.whoseTurn != yourPlayerNum || this.props.displayOnly)
             return
 
           if (document.getElementById('playOrDiscardWindow').open)
@@ -73,7 +73,7 @@
 
       var InvisCard = React.createClass({
         showDialog: function(cardIndex) {
-          if (state.whoseTurn != yourPlayerNum)
+          if (state.whoseTurn != yourPlayerNum || this.props.displayOnly)
             return
 
           if (document.getElementById('clueWindow').open)
@@ -102,13 +102,13 @@
         },
 
         renderCard: function(card) {
-          return <invisCard suit={card.suit} number={card.number}/>
+          return <invisCard displayOnly={false} suit={card.suit} number={card.number}/>
         },
 
         render: function() {
           return (
             <div className="cardContainer">
-              <button className="invisCard" onClick={function(){ this.showDialog(this.props.key) }.bind(this)}>?</button>
+              <button className="invisCard" displayOnly={false} onClick={function(){ this.showDialog(this.props.key) }.bind(this)}>?</button>
             </div>
           )
         }
@@ -116,7 +116,7 @@
 
       var TeamPiles = React.createClass({
         renderCard: function(card) {
-          return <VisCard suit={card.suit} number={card.number}/>
+          return <VisCard displayOnly={true} suit={card.suit} number={card.number}/>
         },
         render: function() {
           var dummies = [{number: "_", suit: "blue"},
@@ -144,7 +144,7 @@
 
       var Discards = React.createClass({
         renderCard: function(card) {
-          return <VisCard suit={card.suit} number={card.number}/>
+          return <VisCard displayOnly={true} suit={card.suit} number={card.number}/>
         },
         render: function() {
           return(<div className="cards discards">{this.props.cards.map(this.renderCard)}</div>
@@ -156,7 +156,7 @@
         render: function() {
           var cards = []
           for (var c = 0; c < this.props.yourCards; c++)
-            cards.push(<InvisCard key={c}/>)
+            cards.push(<InvisCard displayOnly={false} key={c}/>)
 
           return(
             <tr className={this.props.active ? 'currentPlayer' : ''}>
@@ -172,7 +172,7 @@
           var cards = []
           for (var c = 0; c < this.props.cards.length; c++) {
             var card = this.props.cards[c]
-            cards.push(<VisCard suit={card.suit} number={card.number} playerNum={this.props.playerNum}/>)
+            cards.push(<VisCard displayOnly={false} suit={card.suit} number={card.number} playerNum={this.props.playerNum}/>)
           }
           return cards
         },
