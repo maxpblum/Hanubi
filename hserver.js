@@ -1,3 +1,5 @@
+var port = process.env.PORT || 3000;
+
 var http   = require('http');
 
 var static = require('node-static');
@@ -10,7 +12,7 @@ var app = http.createServer(function(request, response) {
         //
         file.serve(request, response);
     }).resume();
-}).listen(8080);
+}).listen(port);
 
 var io     = require('socket.io')(app);
 var _      = require('underscore');
