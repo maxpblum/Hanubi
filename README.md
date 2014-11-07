@@ -30,6 +30,7 @@ Hanubi is an homage to a wonderful cooperative card game. Here are the basic rul
   * Give a clue
     * This consists of telling one other player about all of the cards in his/her hand that are of a particular suit or number.
     * E.g., These are all the 3s in your hand. Or, these are all the Blue cards in your hand.
+    * You can only give a clue if your team has at least one clue available. Otherwise you must play or discard a card.
     * To give a clue, click on one of the cards in your teammate's hand that you want to give a clue about.
     * Be aware that the clue will always be about *all* cards in that category.
 * If the team doesn't lose three lives, the game ends one full turn rotation after the last card is drawn.
