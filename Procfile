@@ -1,2 +1,1 @@
-node: nodemon hserver.js
-web:  grunt connect
+web:  node hserver.js

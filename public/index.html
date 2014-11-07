@@ -6,7 +6,7 @@
     <script src="js/react.js"></script>
     <script src="js/JSXTransformer.js"></script>
     <script src="js/jquery-1.11.1.js"></script>
-    <script src="socket.io.js"></script>
+    <script src="socket.io/socket.io.js"></script>
   </head>
   <body>
     <div id="main">
@@ -23,7 +23,7 @@
         socket.emit("startGame");
       };
 
-      var socket = io(":3001/chat");
+      var socket = io("/chat");
 
       var Status = React.createClass({
         render: function() {

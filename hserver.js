@@ -1,7 +1,19 @@
-var http = require('http');
-var app  = http.createServer().listen(3001);
-var io   = require('socket.io')(app);
-var _    = require('underscore');
+var http   = require('http');
+
+var static = require('node-static');
+var file = new static.Server('./public');
+
+var app = http.createServer(function(request, response) {
+    request.addListener('end', function () {
+        //
+        // Serve files!
+        //
+        file.serve(request, response);
+    }).resume();
+}).listen(8080);
+
+var io     = require('socket.io')(app);
+var _      = require('underscore');
 
 var userHandler = require('./users.js')(io);
 var gameServer = require('./gserver.js')(io);

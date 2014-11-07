@@ -21,7 +21,7 @@
       var Chat = app.Chat;
 
       var gameID = location.search.split('=')[1];
-      var socket = io(":3001/" + gameID);
+      var socket = io("/" + gameID);
 
       var state
       var yourPlayerNum = 0
