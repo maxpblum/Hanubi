@@ -36,6 +36,7 @@ var UserHandler = function(io, timeout) {
 
         this.emitNames();
       },
+      userDead: function(user) {},
       clearUsers: function() {
         this.users = [];
       }
@@ -103,6 +104,7 @@ var UserHandler = function(io, timeout) {
         setTimeout(function() {
 
           if(!user.connected) {
+            group.userDead(users[socket.id]);
             delete users[socket.id];
             console.log("User with id " + socket.id + " deleted (timeout)");
           }

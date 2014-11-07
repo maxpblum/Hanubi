@@ -115,6 +115,11 @@ var GamesHandler = function(io) {
           group.emitNames();
           group.emitState();
         }
+      },
+      userDead: function(group) {
+        return function() {
+          group.sendAll('killGame', '');
+        }
       }
     }
   }

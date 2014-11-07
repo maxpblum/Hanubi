@@ -233,6 +233,9 @@
             this.setState({text: "Connect"});
           }.bind(this))
 
+          socket.on('killGame', function() {
+            window.location.href = '/';            
+          })
           socket.on('gameState', this.gameState)
           socket.on('players', this.setNames)
           socket.on('erra', this.showError)
