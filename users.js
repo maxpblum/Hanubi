@@ -1,6 +1,7 @@
 var _    = require('underscore');
 
-var UserHandler = function(io) {
+var UserHandler = function(io, timeout) {
+  timeout = timeout || 60;
   
   var users = {};
 
@@ -105,7 +106,7 @@ var UserHandler = function(io) {
             console.log("User with id " + socket.id + " deleted (timeout)");
           }
 
-        }, 10000)
+        }, 1000 * timeout)
 
       });
 
