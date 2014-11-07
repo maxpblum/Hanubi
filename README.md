@@ -13,9 +13,9 @@ Hanubi is an homage to a wonderful cooperative card game. Here are the basic rul
 * Everyone is working together to try to create piles of cards.
   * One pile per suit
   * Each pile will eventually consist of a 1, 2, 3, 4 and 5 from its suit, in that order.
-  * It is only valid to play a card if that is the "next" not-yet-played card in its suit's pile.
+  * It is only valid to play a card if that card is the "next" not-yet-played card in its suit's pile.
     * E.g. If the green pile has had a 1 and a 2 played on it, the only valid green card to play is a 3.
-    * It follows that at the start of the game, the only valid cards are any and all 1s.
+    * It follows that at the start of the game, 1s are the only valid cards.
 * On your turn, you may do one of three things:
   * Try to play a card
     * Do this by clicking on the card.
