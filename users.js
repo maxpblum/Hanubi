@@ -97,11 +97,12 @@ var UserHandler = function(io, timeout) {
 
         user.connected = false;
         console.log("User(id=" + socket.id + ") disconnected - setting timeout for connection ");
+        
+        group.userDeleted(users[socket.id]);
 
         setTimeout(function() {
 
           if(!user.connected) {
-            group.userDeleted(users[socket.id]);
             delete users[socket.id];
             console.log("User with id " + socket.id + " deleted (timeout)");
           }
