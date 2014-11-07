@@ -100,8 +100,8 @@
         render: function() {
           return (
             <div>
-              <Start enabled={this.state.start}/>,
-              <PlayersList players={this.state.players} connected={this.state.connected} />,
+              <Start enabled={this.state.start}/>
+              <PlayersList players={this.state.players} connected={this.state.connected} />
               <Chat socket={socket} />
             </div>
           );
