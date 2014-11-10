@@ -13,104 +13,21 @@
     <div id="main">
     </div>
     <script type="text/jsx" src="js/chat.jsx"></script>
+    <script type="text/jsx" src="js/status.jsx"></script>
+    <script type="text/jsx" src="js/index.jsx"></script>
     <script type="text/jsx">
       /** @jsx React.DOM */
       // The above declaration must remain intact at the top of the script.
 
-      var app = app || {};
-      var Chat = app.Chat;
+      var app    = app || {};
+      app.socket = io("/chat");
 
       var startGame = function() {
-        socket.emit("startGame");
+        app.socket.emit("startGame");
       };
 
-      var socket = io("/chat");
-
-      var Status = React.createClass({
-        render: function() {
-          if(this.props.connected) {
-            return <div>There are currently {this.props.players} players connected.</div>
-          } else {
-            return <div>Server is down. I repeat: The server is down! Panic is advisable!</div>
-          }
-        }
-      });
-
-      var Start = React.createClass({
-        render : function() {
-          return (
-            <div id="start">
-              <button disabled={!this.props.enabled} onClick={startGame} className="button">Start Game</button>
-            </div>
-          )
-        }
-      });
-
-      var PlayersList = React.createClass({
-        getInitialState: function() {
-          return {name: ""}
-        },
-        onChange: function(e) {
-          this.setState({name: e.target.value});
-        },
-        handleSubmit: function(e) {
-          e.preventDefault();
-          socket.emit("rename", this.state.name);
-          this.setState({name: ""});
-        },
-        render: function() {
-          var createPlayer = function(player) {
-            return <li key={player.id}>{player.name}</li>
-          };
-          return (
-            <div id="players">
-              <Status connected={this.props.connected} players={this.props.players.length} />
-              <ul>{this.props.players.map(createPlayer)}</ul>
-              <form className='name' onSubmit={this.handleSubmit}>
-                <input onChange={this.onChange} value={this.state.name} />
-                <button className='button' disabled={!this.state.name}>Rename</button>
-              </form>
-            </div>
-          )
-        }
-      });
-
-      var HaNaNabi = React.createClass({
-        getInitialState: function() {
-          socket.on('disconnect', function () {
-            this.setState({players: [], connected: false});
-          }.bind(this));
-
-          socket.on('connect', function () {
-            this.setState({connected: true});
-          }.bind(this));
-
-          socket.on('gameIsStarting', function(gameID) {
-          console.log("Should redirect");
-            window.location.href = '/game.html?gameID=' + gameID;
-          });
-
-          socket.on("players", function(data) {
-            this.setState({players: data, start: data.length > 1 && data.length < 6});
-          }.bind(this));
-          
-          // TODO change start state
-          return {players: [], start: false};
-        },
-
-        render: function() {
-          return (
-            <div>
-              <Start enabled={this.state.start}/>
-              <PlayersList players={this.state.players} connected={this.state.connected} />
-              <Chat socket={socket} />
-            </div>
-          );
-        }
-      
-      });
-
-      React.renderComponent(<HaNaNabi />, document.getElementById('main'));
+      var Hanubi = app.Hanubi;
+      React.renderComponent(<Hanubi />, document.getElementById('main'));
     </script>
   </body>
 </html>
