@@ -43,4 +43,8 @@ Deck.prototype.getLength = function() {
   return this.cards.length
 }
 
+Deck.prototype.getCards = function() {
+  return this.cards
+}
+
 module.exports = Deck

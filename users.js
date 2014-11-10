@@ -1,9 +1,71 @@
 var _    = require('underscore');
 
-var UserHandler = function(io, timeout) {
+var UserHandler = function(io, dataClient, timeout) {
   timeout = timeout || 60;
   
   var users = {};
+  var userDB = new dataClient.ObjSet('user');
+
+  function findUserAndThen(socket, cb) {
+
+    var newID = socket.id;
+
+    var cookie = socket.handshake.headers.cookie;
+    var values = cookie.split(";").map(function(value) { return value.trim().split("="); });
+
+    var oldID;
+
+    for (var i = 0; i < values.length; i++) {
+      var value = values[i];
+      if (value[0] === 'io') {
+        oldID = value[1];
+        break;
+      }
+    }
+
+    if (users[newID]) {
+
+      console.log('found the same socket id: ' + newID)
+
+    } else if (users[oldID]) {
+
+      console.log('updating socket for ' + users[oldID].name);
+      users[newID] = users[oldID];
+
+      deleteUser(oldID);
+      userDB.add(newID, users[newID]);
+
+    } else if (false) {
+
+      userDB.get(newID, function(user) {
+
+        users[newID] = user;
+        cb(user);
+
+      });
+
+      return; // Because cb will be run asynchronously
+
+    } else {
+      makeNewUser(newID);
+    }
+
+    cb(users[newID]);
+  }
+
+  function makeNewUser(id) {
+    var dateAndTime = Date.now();
+    users[id] = {created: dateAndTime, name: "Anonymous"};
+
+    console.log('made new user with id ' + id); 
+    
+    userDB.add(id, users[id]);
+  }
+
+  function deleteUser(id) {
+    delete users[id];
+    userDB.delete(id);
+  }
 
   this.makeGroup = function(name, userMessages, groupMethods) {
     var nsp = name ? io.of('/' + name) : io;
@@ -25,7 +87,7 @@ var UserHandler = function(io, timeout) {
       connected: function() {
         return this.users;
       },
-      userDeleted: function(user) {
+      userDisconnected: function(user) {
 
         for (var i = 0; i < this.users.length; i++) {
           if (this.users[i] === user) {
@@ -50,78 +112,48 @@ var UserHandler = function(io, timeout) {
 
     nsp.on('connection', function(socket) {
 
-      var user;
+      var installUser = function(user) {
 
-      if(users[socket.id]) {
-        console.log('found the same socket id: ' + socket.id)
-        user           = users[socket.id];
-      }
-
-      var cookie = socket.handshake.headers.cookie;
-
-      if(!user && cookie) {
-
-        var values = cookie.split(";").map(function(value) { return value.trim().split("="); });
-
-        for(var i=0; i<values.length; i++) {
-
-          var value = values[i];
-
-          if(value[0] === 'io') {
-
-            if(users[value[1]]) {
-
-              console.log('updating socket for ' + users[value[1]].name);
-              users[socket.id] = users[value[1]];
-              delete users[value[1]];
-              user = users[socket.id];
-
-            }
-          }
+        if (!_.find(group.users, function(groupUser) { return groupUser === user; })) {
+          group.users.push(user);
         }
-      } 
 
-      if(!user) {
-        users[socket.id] = {created: Date.now(),
-                            name: "Anonymous"};
-        user = users[socket.id]
-        console.log('made new user with id ' + socket.id);  
-      }
+        user.connected = true;
+        user.updateProp('connected', true);
 
-      if (!_.find(group.users, function(groupUser) { return groupUser === user; })) {
-        group.users.push(user);
-      }
+        socket.on('disconnect', function() {
 
-      user.connected = true;
+          user.connected = false;
+          user.updateProp('connected', false);
+          console.log("User(id=" + socket.id + ") disconnected - setting timeout for connection ");
+          
+          group.userDisconnected(users[socket.id]);
 
-      socket.on('disconnect', function() {
+          setTimeout(function() {
 
-        user.connected = false;
-        console.log("User(id=" + socket.id + ") disconnected - setting timeout for connection ");
-        
-        group.userDeleted(users[socket.id]);
+            if(!user.connected) {
+              group.userDead(users[socket.id]);
+              deleteUser(socket.id);
+              console.log("User with id " + socket.id + " deleted (timeout)");
+            }
 
-        setTimeout(function() {
+          }, 1000 * timeout)
 
-          if(!user.connected) {
-            group.userDead(users[socket.id]);
-            delete users[socket.id];
-            console.log("User with id " + socket.id + " deleted (timeout)");
-          }
-
-        }, 1000 * timeout)
-
-      });
-
-      if (userMessages) {
-        _.keys(userMessages).forEach(function(messageName) {
-          user[messageName] = userMessages[messageName](user, group);
-          socket.on(messageName, user[messageName]);
         });
-      }
 
-      user.emit = socket.emit.bind(socket);
-      group.updateUsers();
+        if (userMessages) {
+          _.keys(userMessages).forEach(function(messageName) {
+            user[messageName] = userMessages[messageName](user, group);
+            socket.on(messageName, user[messageName]);
+          });
+        }
+
+        user.emit = socket.emit.bind(socket);
+        group.updateUsers();
+
+      };
+
+      findUserAndThen(socket, installUser);
 
     });
 

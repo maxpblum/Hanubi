@@ -6,6 +6,7 @@
     "grunt-contrib-connect": "^0.8.0",
     "grunt-nodemon": "^0.3.0",
     "node-static": "^0.7.6",
+    "redis": "^0.12.1",
     "socket.io": "~1.0.0",
     "underscore": "^1.7.0"
   },

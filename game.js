@@ -168,7 +168,7 @@ Game.prototype.giveClue = function(playerIndex, clueRecipientIndex, suitOrValue)
 
 Game.prototype.stringify = function (forPlayer) {
 
-  var toSend = {
+  var stateData = {
     playerCount: this.getPlayers().length,
     hands: this.getPlayers().map(function(player) {
       return player.getCards()
@@ -188,11 +188,55 @@ Game.prototype.stringify = function (forPlayer) {
     gameIsOver: this.isOver,
     whoseTurn: this.isOver ? -1 : this.turn, 
     score: this.score
+  };
+
+  stateData.hands[forPlayer] = undefined;
+  
+  return stateData;
+}
+
+Game.prototype.totalState = function() {
+  return {
+    playerCount: this.getPlayers().length,
+    hands: this.getPlayers().map(function(player) {
+      return player.getCards()
+    }),
+    deck: this.deck.getCards(),
+    clues: this.clues,
+    lives: this.lives,
+    teamPiles: function(){
+      var cards = []
+      for (var suit in this.getTeamPiles())
+        cards.push(this.getTeamPiles()[suit])
+      return cards
+    }.bind(this)(),
+    discards: this.discardPile,
+    gameIsOver: this.isOver,
+    whoseTurn: this.isOver ? -1 : this.turn, 
+    score: this.score
   }
+}
 
-  toSend.hands[forPlayer] = undefined
+module.exports.unfreezeGame = function(state) {
 
-  return toSend
+  var game = new Game(stateString.playerCount);
+
+  game.getPlayers.forEach(function(player, index) {
+    player.cards = hands[index];
+  });
+  game.deck.cards = state.cards;
+  game.clues = state.clues;
+  game.lives = state.lives;
+  state.teamPiles.forEach(function(card) {
+    game.teamPiles.piles[card.suit] = card;
+  });
+  game.discardPile = state.discards;
+  game.isOver = state.gameIsOver;
+  game.turn = state.whoseTurn;
+  game.score = state.score;
+
+  return game;
+
 }
 
 module.exports = Game

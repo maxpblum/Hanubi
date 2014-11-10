@@ -1,18 +1,25 @@
 var _    = require('underscore');
 var Game = require('./game');
 
-var GamesHandler = function(io) {
+var GamesHandler = function(dataClient, oldGameCallback) {
 
   var gameCounter = 897;
   var games = {}
+  var gameDB = new dataClient.ObjSet('game');
+
+  function writeState(gameID) {
+    gameDB.add(gameID, JSON.stringify(games[gameID].totalState()));
+  }
   
   this.createGame = function(players) {
 
     var gameID = gameCounter++;
     games[gameID] = new Game(players.length);
+    writeState(gameID);
 
     players.forEach(function(player, index) {
       player.num = index;
+      player.updateProp('num', index);
     });
 
     return gameID;
@@ -36,6 +43,7 @@ var GamesHandler = function(io) {
               matching: matching
             });
             group.updateUsers();
+            writeState(gameID);
           }
           catch(err) {
             console.log(err.message);
@@ -56,6 +64,7 @@ var GamesHandler = function(io) {
               action: result.valid ? 'played a card' : 'tried to play an invalid card'
             })
             group.updateUsers();
+            writeState(gameID);
           }
           catch(err) {
             console.log(err.message)
@@ -75,6 +84,7 @@ var GamesHandler = function(io) {
               action: 'discarded a card'
             });
             group.updateUsers();
+            writeState(gameID);
           }
           catch(err) {
             console.log(err.message)
@@ -124,8 +134,23 @@ var GamesHandler = function(io) {
     }
   }
 
+  gameDB.getAll(function(foundGames) {
+
+    var gameKeys = _.keys(foundGames)
+
+    gameKeys.forEach(function(gameKey) {
+
+      gameCounter = max(gameCounter, gameKey + 1);
+      games[gameKey] = Game.unfreezeGame( foundGames[gameKey] );
+
+      oldGameCallback(gameKey);
+
+    });
+
+  });
+
 }
 
-module.exports = function(io) {
-  return new GamesHandler(io);
+module.exports = function() {
+  return new GamesHandler();
 };

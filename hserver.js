@@ -1,30 +1,55 @@
-var port = process.env.PORT || 3000;
+var userHandler;
+var _ = require('underscore');
 
-var http   = require('http');
+if (process.argv[2] != 'ai') {
 
-var static = require('node-static');
-var file = new static.Server('./public');
+  var port = process.env.PORT || 3000;
 
-var app = http.createServer(function(request, response) {
-    request.addListener('end', function () {
-        //
-        // Serve files!
-        //
-        file.serve(request, response);
-    }).resume();
-}).listen(port);
+  var http   = require('http');
 
-var io     = require('socket.io')(app);
-var _      = require('underscore');
+  var static = require('node-static');
+  var file = new static.Server('./public');
 
-var userHandler = require('./users.js')(io);
-var gameServer = require('./gserver.js')(io);
+  var app = http.createServer(function(request, response) {
+      request.addListener('end', function () {
+          //
+          // Serve files!
+          //
+          file.serve(request, response);
+      }).resume();
+  }).listen(port);
+
+  var io     = require('socket.io')(app);
+
+  var dataClient = require('./data');
+
+  userHandler = require('./users.js')(io, dataClient);
+
+} else {
+  userHandler = require('./ai.js');
+}
+
+function oldGameCallback(gameID) {
+
+  var userMessages    = gameServer.userMessages(gameID);
+  var groupMethods    = gameServer.groupMethods(gameID);
+  userMessages.rename = makeRename;
+  userMessages.chat   = makeChat;
+
+  var gameGroup = userHandler.makeGroup(gameID, 
+                                        userMessages, 
+                                        groupMethods);
+  
+}
+
+var gameServer = require('./gserver.js')(dataClient, oldGameCallback);
 
 function makeRename(user, group) {
 
   return function(newName) {
 
     console.warn("User '"+ user.name + "' changed name to '" + newName + "'");
+    user.updateProp('name', newName);
     user.name = newName;
     group.emitNames();
 
