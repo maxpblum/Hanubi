@@ -176,7 +176,7 @@ Game.prototype.stringify = function (forPlayer) {
     deckLength: this.getDeckLength(),
     clues: this.clues,
     lives: this.lives,
-    youAre: forPlayer,
+    yourPlayerNum: forPlayer,
     yourCards: this.getPlayers()[forPlayer].getCards().length,
     teamPiles: function(){
       var cards = []
