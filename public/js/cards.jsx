@@ -16,10 +16,10 @@ var app = app || {};
       if (this.props.whoseTurn != this.props.yourPlayerNum || this.props.displayOnly)
         return
 
-      if (document.getElementById('playOrDiscardWindow').open)
-        document.getElementById('playOrDiscardWindow').close()
+      if ($('#playOrDiscardWindow').is(":visible"))
+        $('#playOrDiscardWindow').hide();
 
-      var dialog = document.getElementById('clueWindow')
+      var dialog = $('#clueWindow');
       dialog.show();
 
       document.getElementById('giveClueAboutSuit').onclick = function() {
@@ -28,7 +28,7 @@ var app = app || {};
           recipient: recipient,
           suitOrNumber: suit
         }))
-        dialog.close()
+        dialog.hide()
       }.bind(this);
 
       document.getElementById('giveClueAboutNumber').onclick = function() {
@@ -37,11 +37,11 @@ var app = app || {};
           recipient: recipient,
           suitOrNumber: number
         }))
-        dialog.close()
+        dialog.hide()
       }.bind(this);
 
       document.getElementById('cancelClueWindow').onclick = function() {
-        dialog.close()
+        dialog.hide()
       }.bind(this);
     },
 
@@ -68,10 +68,10 @@ var app = app || {};
       if (this.props.whoseTurn != this.props.yourPlayerNum || this.props.displayOnly)
         return
 
-      if (document.getElementById('clueWindow').open)
-        document.getElementById('clueWindow').close()
+      if ($('#clueWindow').is(":visible"))
+        $('#clueWindow').hide();
 
-      var dialog = document.getElementById('playOrDiscardWindow')
+      var dialog = $('#playOrDiscardWindow')
       dialog.show();
 
       document.getElementById('playCard').onclick = function() {
@@ -79,7 +79,7 @@ var app = app || {};
           player: this.props.yourPlayerNum,
           cardIndex: cardIndex
         }))
-        dialog.close()
+        dialog.hide()
       }.bind(this);
 
       document.getElementById('discard').onclick = function() {
@@ -87,11 +87,11 @@ var app = app || {};
           player: this.props.yourPlayerNum,
           cardIndex: cardIndex
         }))
-        dialog.close()
+        dialog.hide()
       }.bind(this)
 
       document.getElementById('cancelPDWindow').onclick = function() {
-        dialog.close()
+        dialog.hide()
       }.bind(this)
     },
 

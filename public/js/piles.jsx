@@ -11,6 +11,8 @@ var app = app || {};
 (function () {
   'use strict';
 
+  var VisCard   = app.VisCard;
+  var InvisCard = app.InvisCard;
 
   app.TeamPiles = React.createClass({
     renderCard: function(card) {

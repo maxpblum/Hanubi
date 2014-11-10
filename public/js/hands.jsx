@@ -11,6 +11,8 @@ var app = app || {};
 (function () {
   'use strict';
 
+  var VisCard   = app.VisCard;
+  var InvisCard = app.InvisCard;
 
   var MyHand = React.createClass({
     render: function() {

@@ -9,7 +9,6 @@
 var app = app || {};
 
 (function () {
-  'use strict';
 
   var Chat = app.Chat;
   var VisCard   = app.VisCard;
@@ -20,8 +19,6 @@ var app = app || {};
 
   app.Hanubi = React.createClass({
     getInitialState: function() {
-
-
       return {hands: [[0]],
               teamPiles: [],
               discards: [],
@@ -101,5 +98,4 @@ var app = app || {};
       )
     }
   });
-
 })();

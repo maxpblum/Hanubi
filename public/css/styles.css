@@ -218,11 +218,17 @@ div#start .button {
 .dialog {
  position:            absolute;
  top:                 250px;
+ left:                50%;
+ display:             none;
+}
+.dialog div {
+ position:            relative;
+ left:                -50%;
  padding:             50px;
  border-radius:       15px;
  background-color:    #11083f;
 }
-dialog > button {
+.dialog > button {
   padding:      20px;
   font-size:    1.5em;
 }

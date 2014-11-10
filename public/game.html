@@ -27,18 +27,23 @@
       app.gameId = location.search.split('=')[1];
       app.socket = io("/" + app.gameId);
 
+      var Hanubi = app.Hanubi;
       React.renderComponent(<Hanubi />, document.getElementById('main'));
 
     </script>
-    <dialog id="clueWindow" class="dialog">
-      <button class="button" id="giveClueAboutSuit">Suit Clue</button>
-      <button class="button" id="giveClueAboutNumber">Number Clue</button>
-      <button class="button" id="cancelClueWindow">Cancel</button>
-    </dialog>
-    <dialog id="playOrDiscardWindow" class="dialog">
-      <button class="button" id="playCard">Play Card</button>
-      <button class="button" id="discard">Discard</button>
-      <button class="button" id="cancelPDWindow">Cancel</button>
-    </dialog>
+    <div id="clueWindow" class="dialog">
+      <div>
+        <button class="button" id="giveClueAboutSuit">Suit Clue</button>
+        <button class="button" id="giveClueAboutNumber">Number Clue</button>
+        <button class="button" id="cancelClueWindow">Cancel</button>
+      </div>
+    </div>
+    <div id="playOrDiscardWindow" class="dialog">
+      <div>
+        <button class="button" id="playCard">Play Card</button>
+        <button class="button" id="discard">Discard</button>
+        <button class="button" id="cancelPDWindow">Cancel</button>
+      </div>
+    </div>
   </body>
 </html>
