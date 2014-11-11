@@ -10,7 +10,8 @@ var GamesHandler = function(ObjSet, oldGameCallback) {
   function writeState(gameID) {
     var state = games[gameID].totalState();
     gameDB.add(gameID, state, function (err, reply) {
-      console.log('Successfully wrote this game: ' + state);
+      if (err)
+        console.log(err);
     });
   }
   
@@ -21,7 +22,6 @@ var GamesHandler = function(ObjSet, oldGameCallback) {
     writeState(gameID);
 
     players.forEach(function(player, index) {
-      player.num = index;
       player.updateProp('num', index);
     });
 
@@ -56,16 +56,17 @@ var GamesHandler = function(ObjSet, oldGameCallback) {
       },
       playCard: function(player, group) {
         return function(play) {
-          console.log("PLAYING CARD");
           play = JSON.parse(play)
           try {
             var result = state.playCard(play.player, play.cardIndex);
+            var action = result.valid ? 'played a card' : 'tried to play an invalid card';
             group.emitMove({
               player: player.num,
               card: result.card,
               cardIndex: play.cardIndex,
-              action: result.valid ? 'played a card' : 'tried to play an invalid card'
-            })
+              action: action
+            });
+            console.log(action);
             group.updateUsers();
             writeState(gameID);
           }
@@ -105,7 +106,6 @@ var GamesHandler = function(ObjSet, oldGameCallback) {
     return {
       emitState: function(group) {
         return function() {
-          console.log('in emitState');
           group.users.forEach(function(player) {
             console.log('emitting state to ' + player.name);
             player.emit('gameState', state.stringify(player.num));
@@ -124,7 +124,6 @@ var GamesHandler = function(ObjSet, oldGameCallback) {
       },
       updateUsers: function(group) {
         return function() {
-          console.log('in the new, game-written updateUsers method')
           group.emitNames();
           group.emitState();
         }

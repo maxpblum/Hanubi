@@ -23,9 +23,9 @@ function ObjSet(singular, groupName) {
     return singular + ':' + key;
   }
 
-  this.makeUpdateProp = function(key) {
-    console.log('about to write updateProp');
+  this.makeUpdateProp = function(obj, key) {
     return function(propKey, value, cb) {
+      obj[propKey] = value;
       redis.hset(objKey(key), propKey, value, cb);
     }
   };
@@ -38,9 +38,6 @@ function ObjSet(singular, groupName) {
       counter--;
       if (err) {
         console.log('Error: ' + err);
-      }
-      else {
-        console.log('Result: ' + result);
       }
       if (counter === 0 && cb) {
         cb(err, result);
@@ -78,13 +75,10 @@ function ObjSet(singular, groupName) {
 
     redis.smembers(groupName, function(err, keys) {
 
-      console.log('in smembers callback, keys: ' + keys);
-
       var keysLeft = keys.length;
       var reply = {}
 
       keys.forEach(function(key) {
-        console.log('in forEach with key ' + key);
         this.get( key, function(err, obj) {
 
           if (err) { 

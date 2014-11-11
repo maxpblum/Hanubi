@@ -84,7 +84,6 @@ Game.prototype.afterMove = function() {
 }
 
 Game.prototype.discard = function(playerIndex, cardIndex) {
-  this.logMove(playerIndex, cardIndex)
   this.beforeMove(playerIndex)
 
   if (this.clues === this.MAX_CLUES)
@@ -101,12 +100,7 @@ Game.prototype.discard = function(playerIndex, cardIndex) {
   return discarded;
 }
 
-Game.prototype.logMove = function(playerIndex, cardIndex) {
-  console.log('player ' + playerIndex + ' tried to play card ' + cardIndex)
-}
-
 Game.prototype.playCard = function(playerIndex, cardIndex) {
-  this.logMove(playerIndex, cardIndex)
   this.beforeMove(playerIndex)
 
   var playedCard = this.players[playerIndex].takeCard(cardIndex)

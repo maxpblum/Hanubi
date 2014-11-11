@@ -7,12 +7,7 @@ var UserHandler = function(io, ObjSet, timeout) {
   var users = {};
   var userDB = new ObjSet('user');
 
-  function findUserAndThen(socket, cb) {
-
-    var newID = socket.id;
-
-    var cookie = socket.handshake.headers.cookie;
-    var oldID;
+  function cookieID(cookie) {
 
     if (cookie) {
 
@@ -21,12 +16,20 @@ var UserHandler = function(io, ObjSet, timeout) {
       for (var i = 0; i < values.length; i++) {
         var value = values[i];
         if (value[0] === 'io') {
-          oldID = value[1];
-          break;
+          return value[1];
         }
       }
 
     }
+
+    return;
+
+  }
+
+  function findUserAndThen(socket, cb) {
+
+    var newID = socket.id;
+    var oldID = cookieID(socket.handshake.headers.cookie);
 
     if (users[newID]) {
 
@@ -37,17 +40,19 @@ var UserHandler = function(io, ObjSet, timeout) {
     } else if (oldID && users[oldID]) {
 
       updateSocket(newID, oldID, cb);
-      
-    } else {
+
+    } else { // Didn't find the user in memory, checking database
+
       userFromDB(newID, oldID, function(user) {
         
-        users[newID].updateProp = userDB.makeUpdateProp(newID);
+        users[newID].updateProp = userDB.makeUpdateProp(users[newID], newID);
         users[newID] = user;
         if (cb)
           cb(users[newID]);
 
       });
     }
+
   }
 
   function updateSocket(newID, oldID, cb) {
@@ -57,7 +62,7 @@ var UserHandler = function(io, ObjSet, timeout) {
 
     deleteUser(oldID);
     userDB.add(newID, users[newID], function() {
-      users[newID].updateProp = userDB.makeUpdateProp(newID);
+      users[newID].updateProp = userDB.makeUpdateProp(users[newID], newID);
       if (cb)
         cb(users[newID]);
     });
@@ -85,32 +90,31 @@ var UserHandler = function(io, ObjSet, timeout) {
 
     userDB.get(id, function(err, user) {
 
-      if (!user) {
+      if (err) {
+        console.log(err);
+      }
 
-        if (oldID) {
+      if (!user) { // Current ID not found in DB
+
+        if (oldID) { // User has a previous ID
 
           userDB.get(oldID, function(err, user) {
 
             if (err) {
-
               console.log(err);
-
-            } else if (!user) {
+            } else if (!user) { // User not in DB at all
 
               newUser(id, cb);
 
-            } else {
+            } else { // User found under previous ID
 
               users[oldID] = user;
               updateSocket(id, oldID, cb);
 
             }
-
           });
-
         }
-
-      } else {
+      } else { // User found under current ID
 
         users[id] = user;
         if (cb)
@@ -175,15 +179,14 @@ var UserHandler = function(io, ObjSet, timeout) {
       var installUser = function(user) {
 
         if (!_.find(group.users, function(groupUser) { return groupUser === user; })) {
+          // User isn't already in this group, so add it
           group.users.push(user);
         }
 
-        user.connected = true;
         user.updateProp('connected', true);
 
         socket.on('disconnect', function() {
 
-          user.connected = false;
           user.updateProp('connected', false);
           console.log("User(id=" + socket.id + ") disconnected - setting timeout for connection ");
           
