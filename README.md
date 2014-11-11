@@ -1,7 +1,7 @@
 Hanubi
 ======
 
-Fireworks! It's a card game. [Live copy on Heroku](https://murmuring-lowlands-3725.herokuapp.com).
+Fireworks! It's a card game. [Live copy on Heroku](https://hanubi.herokuapp.com).
 
 To run the server locally, just clone the repository and run `npm install`.
 
