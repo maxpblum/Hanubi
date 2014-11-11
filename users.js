@@ -1,65 +1,125 @@
 var _    = require('underscore');
 
-var UserHandler = function(io, dataClient, timeout) {
+var UserHandler = function(io, ObjSet, timeout) {
+
   timeout = timeout || 60;
   
   var users = {};
-  var userDB = new dataClient.ObjSet('user');
+  var userDB = new ObjSet('user');
 
   function findUserAndThen(socket, cb) {
 
     var newID = socket.id;
 
     var cookie = socket.handshake.headers.cookie;
-    var values = cookie.split(";").map(function(value) { return value.trim().split("="); });
-
     var oldID;
 
-    for (var i = 0; i < values.length; i++) {
-      var value = values[i];
-      if (value[0] === 'io') {
-        oldID = value[1];
-        break;
+    if (cookie) {
+
+      var values = cookie.split(";").map(function(value) { return value.trim().split("="); });
+
+      for (var i = 0; i < values.length; i++) {
+        var value = values[i];
+        if (value[0] === 'io') {
+          oldID = value[1];
+          break;
+        }
       }
+
     }
 
     if (users[newID]) {
 
       console.log('found the same socket id: ' + newID)
+      if (cb)
+        cb(users[newID]);
 
-    } else if (users[oldID]) {
+    } else if (oldID && users[oldID]) {
 
-      console.log('updating socket for ' + users[oldID].name);
-      users[newID] = users[oldID];
-
-      deleteUser(oldID);
-      userDB.add(newID, users[newID]);
-
-    } else if (false) {
-
-      userDB.get(newID, function(user) {
-
+      updateSocket(newID, oldID, cb);
+      
+    } else {
+      userFromDB(newID, oldID, function(user) {
+        
+        users[newID].updateProp = userDB.makeUpdateProp(newID);
         users[newID] = user;
-        cb(user);
+        if (cb)
+          cb(users[newID]);
 
       });
-
-      return; // Because cb will be run asynchronously
-
-    } else {
-      makeNewUser(newID);
     }
-
-    cb(users[newID]);
   }
 
-  function makeNewUser(id) {
+  function updateSocket(newID, oldID, cb) {
+
+    console.log('updating socket for ' + users[oldID].name);
+    users[newID] = users[oldID];
+
+    deleteUser(oldID);
+    userDB.add(newID, users[newID], function() {
+      users[newID].updateProp = userDB.makeUpdateProp(newID);
+      if (cb)
+        cb(users[newID]);
+    });
+
+  }
+
+  function newUser(id, cb) {
+
     var dateAndTime = Date.now();
     users[id] = {created: dateAndTime, name: "Anonymous"};
 
     console.log('made new user with id ' + id); 
     
-    userDB.add(id, users[id]);
+    userDB.add(id, users[id], function(err, reply) {
+      if (err) {
+        console.log(err);
+      } else if (cb) {
+        cb(users[id]);
+      }
+    });
+
+  }
+
+  function userFromDB(id, oldID, cb) {
+
+    userDB.get(id, function(err, user) {
+
+      if (!user) {
+
+        if (oldID) {
+
+          userDB.get(oldID, function(err, user) {
+
+            if (err) {
+
+              console.log(err);
+
+            } else if (!user) {
+
+              newUser(id, cb);
+
+            } else {
+
+              users[oldID] = user;
+              updateSocket(id, oldID, cb);
+
+            }
+
+          });
+
+        }
+
+      } else {
+
+        users[id] = user;
+        if (cb)
+          cb(user);
+
+      }
+
+    });
+
   }
 
   function deleteUser(id) {
@@ -162,6 +222,6 @@ var UserHandler = function(io, dataClient, timeout) {
 
 }
 
-module.exports = function(io) {
-  return new UserHandler(io);
+module.exports = function(io, ObjSet, timeout) {
+  return new UserHandler(io, ObjSet, timeout);
 };

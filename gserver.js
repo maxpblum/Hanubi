@@ -1,14 +1,17 @@
 var _    = require('underscore');
 var Game = require('./game');
 
-var GamesHandler = function(dataClient, oldGameCallback) {
+var GamesHandler = function(ObjSet, oldGameCallback) {
 
   var gameCounter = 897;
   var games = {}
-  var gameDB = new dataClient.ObjSet('game');
+  var gameDB = new ObjSet('game');
 
   function writeState(gameID) {
-    gameDB.add(gameID, JSON.stringify(games[gameID].totalState()));
+    var state = games[gameID].totalState();
+    gameDB.add(gameID, state, function (err, reply) {
+      console.log('Successfully wrote this game: ' + state);
+    });
   }
   
   this.createGame = function(players) {
@@ -136,14 +139,20 @@ var GamesHandler = function(dataClient, oldGameCallback) {
 
   gameDB.getAll(function(foundGames) {
 
+    console.log('foundGames: ' + JSON.stringify(foundGames));
+
     var gameKeys = _.keys(foundGames)
 
     gameKeys.forEach(function(gameKey) {
 
-      gameCounter = max(gameCounter, gameKey + 1);
-      games[gameKey] = Game.unfreezeGame( foundGames[gameKey] );
+      if (foundGames[gameKey]) {
+        gameCounter = gameCounter > gameKey + 1 ? gameCounter : gameKey + 1;
+        games[gameKey] = Game.unfreezeGame( foundGames[gameKey] );
 
-      oldGameCallback(gameKey);
+        oldGameCallback(gameKey);
+      } else {
+        gameDB.delete(gameKey);
+      }
 
     });
 
@@ -151,6 +160,6 @@ var GamesHandler = function(dataClient, oldGameCallback) {
 
 }
 
-module.exports = function() {
-  return new GamesHandler();
+module.exports = function(ObjSet, oldGameCallback) {
+  return new GamesHandler(ObjSet, oldGameCallback);
 };

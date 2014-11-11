@@ -191,12 +191,12 @@ Game.prototype.stringify = function (forPlayer) {
   };
 
   stateData.hands[forPlayer] = undefined;
-  
+
   return stateData;
 }
 
 Game.prototype.totalState = function() {
-  return {
+  return {game: JSON.stringify({
     playerCount: this.getPlayers().length,
     hands: this.getPlayers().map(function(player) {
       return player.getCards()
@@ -214,17 +214,19 @@ Game.prototype.totalState = function() {
     gameIsOver: this.isOver,
     whoseTurn: this.isOver ? -1 : this.turn, 
     score: this.score
-  }
+  })};
 }
 
-module.exports.unfreezeGame = function(state) {
+Game.unfreezeGame = function(state) {
 
-  var game = new Game(stateString.playerCount);
+  state = JSON.parse(state.game);
 
-  game.getPlayers.forEach(function(player, index) {
-    player.cards = hands[index];
+  var game = new Game(state.playerCount);
+
+  game.getPlayers().forEach(function(player, index) {
+    player.cards = state.hands[index];
   });
-  game.deck.cards = state.cards;
+  game.deck.cards = state.deck;
   game.clues = state.clues;
   game.lives = state.lives;
   state.teamPiles.forEach(function(card) {

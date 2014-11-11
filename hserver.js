@@ -1,33 +1,26 @@
-var userHandler;
 var _ = require('underscore');
 
-if (process.argv[2] != 'ai') {
+var port = process.env.PORT || 3000;
 
-  var port = process.env.PORT || 3000;
+var http   = require('http');
 
-  var http   = require('http');
+var static = require('node-static');
+var file = new static.Server('./public');
 
-  var static = require('node-static');
-  var file = new static.Server('./public');
+var app = http.createServer(function(request, response) {
+    request.addListener('end', function () {
+        //
+        // Serve files!
+        //
+        file.serve(request, response);
+    }).resume();
+}).listen(port);
 
-  var app = http.createServer(function(request, response) {
-      request.addListener('end', function () {
-          //
-          // Serve files!
-          //
-          file.serve(request, response);
-      }).resume();
-  }).listen(port);
+var io     = require('socket.io')(app);
 
-  var io     = require('socket.io')(app);
+var ObjSet = require('./data.js');
 
-  var dataClient = require('./data');
-
-  userHandler = require('./users.js')(io, dataClient);
-
-} else {
-  userHandler = require('./ai.js');
-}
+userHandler = require('./users.js')(io, ObjSet);
 
 function oldGameCallback(gameID) {
 
@@ -42,7 +35,7 @@ function oldGameCallback(gameID) {
   
 }
 
-var gameServer = require('./gserver.js')(dataClient, oldGameCallback);
+var gameServer = require('./gserver.js')(ObjSet, oldGameCallback);
 
 function makeRename(user, group) {
 

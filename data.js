@@ -21,47 +21,85 @@ function ObjSet(singular, groupName) {
     return singular + ':' + key;
   }
 
-  this.add = function(key, obj) {
-    redis.sadd(groupName, key);
-    writeObj(objKey(key), obj);
+  this.makeUpdateProp = function(key) {
+    console.log('about to write updateProp');
+    return function(propKey, value, cb) {
+      redis.hset(objKey(key), propKey, value, cb);
+    }
   };
 
-  this.get = function (userKey, cb) {
+  this.add = function(key, obj, cb) {
 
-    redis.hgetall(objKey(userKey), function(err, obj) {
+    var counter = 2;
 
-      obj.updateProp = function(propKey, value) {
-        redis.hset(userKey, propKey, value);
-      };
+    function maybeCallback(err, result) {
+      counter--;
+      if (err) {
+        console.log('Error: ' + err);
+      }
+      else {
+        console.log('Result: ' + result);
+      }
+      if (counter === 0 && cb) {
+        cb(err, result);
+      }
+    }
 
-      cb(obj);
-
-    });
-
+    redis.sadd(groupName, key, maybeCallback);
+    redis.hmset(objKey(key), obj, maybeCallback);
   };
 
-  this.delete = function(key) {
-    redis.del(objKey(key));
-    redis.srem(groupName, key);
+  this.get = function (key, cb) {
+    redis.hgetall(objKey(key), cb);
+  };
+
+  this.delete = function(key, cb) {
+    console.log('Deleting key ' + key + ' from ' + groupName);
+
+    var counter = 2;
+
+    function maybeCallback() {
+      counter--;
+      if (counter === 0 && cb) {
+        cb();
+      }
+    }
+
+    redis.del(objKey(key), maybeCallback);
+    redis.srem(groupName, key, maybeCallback);
+
   }
 
   this.getAll = function(cb) {
 
+    console.log('Looking up ' + groupName);
+
     redis.smembers(groupName, function(err, keys) {
 
-      keys.forEach(function(key) {
+      console.log('in smembers callback, keys: ' + keys);
 
-        this.get( objKey(key), function(obj) {
+      var keysLeft = keys.length;
+      var reply = {}
+
+      keys.forEach(function(key) {
+        console.log('in forEach with key ' + key);
+        this.get( key, function(err, obj) {
+
+          if (err) { 
+            console.log(err); 
+          } else {
+            console.log('Found ' + obj + ' at key ' + key);
+          }
 
           reply[key] = obj;
+          keysLeft--;
+          if (cb && keysLeft === 0) {
+            cb(reply);
+          }
 
         } );
 
-      reply.finished = true;
-
       }.bind(this));
-
-      cb(reply);
 
     }.bind(this));
 
@@ -69,19 +107,4 @@ function ObjSet(singular, groupName) {
 
 }
 
-function writeObj(key, obj) {
-
-  var args = [key]
-
-  for (var propKey in obj) {
-    if (obj.hasOwnProperty(propKey) && obj[propKey]) {
-      args.push(propKey);
-      args.push(obj[propKey]);
-    }
-  }
-
-  redis.hmset.apply(redis, args);
-
-}
-
-module.exports.ObjSet = ObjSet;
+module.exports = ObjSet;
