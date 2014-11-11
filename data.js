@@ -1,5 +1,7 @@
 if (process.env.REDISTOGO_URL) {
 
+  console.log('Found redis!')
+
   var rtg   = require("url").parse(process.env.REDISTOGO_URL);
   var redis = require("redis").createClient(rtg.port, rtg.hostname);
 
