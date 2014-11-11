@@ -146,7 +146,8 @@ var GamesHandler = function(ObjSet, oldGameCallback) {
     gameKeys.forEach(function(gameKey) {
 
       if (foundGames[gameKey]) {
-        gameCounter = gameCounter > gameKey + 1 ? gameCounter : gameKey + 1;
+        var intGameKey = parseInt(gameKey);
+        gameCounter = gameCounter > intGameKey + 1 ? gameCounter : intGameKey + 1;
         games[gameKey] = Game.unfreezeGame( foundGames[gameKey] );
 
         oldGameCallback(gameKey);
