@@ -103,7 +103,6 @@ var UserHandler = function(io, ObjSet, timeout) {
             if (err) {
               console.log(err);
             } else if (!user) { // User not in DB at all
-
               newUser(id, cb);
 
             } else { // User found under previous ID
@@ -113,6 +112,9 @@ var UserHandler = function(io, ObjSet, timeout) {
 
             }
           });
+        } else { // No previous ID
+          console.log("Here!")
+          newUser(id, cb);
         }
       } else { // User found under current ID
 
